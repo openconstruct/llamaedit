@@ -1,5 +1,5 @@
 # llamaedit
-LLamaEdit is a code editor with AI autocompletion powered by LLamaCPP. You must have llama-server running with a model loaded, I suggest deepcoder 14b or deepseek coder v2 lite. I only have a 4gb card though.
+LLamaEdit is a code editor with AI autocompletion powered by LLamaCPP and CodeMirror. You must have llama-server running with a model loaded, I suggest deepcoder 14b or deepseek coder v2 lite. I only have a 4gb card though.
 Should work on any computer or operating system with a fairly modern web browser.
 The file operations have keyboard commands, mouse over to see them. Usage shluld be self-explanatory, alt+backspc to get suggested autocomplete, tab to accept, esc to cancel.
 
