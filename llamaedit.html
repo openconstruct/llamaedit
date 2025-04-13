@@ -1,871 +1,1187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LLamaEdit</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLamaEdit</title>
+<!-- CodeMirror Core -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+<!-- CodeMirror Base Addons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/dialog/dialog.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/search/search.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/search/searchcursor.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/dialog/dialog.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/javascript-hint.min.js"></script> <!-- Base JS hint -->
+<!-- CodeMirror Linting Addons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/lint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/lint.min.js"></script>
+<!-- Linters (Load *before* CM lint bridges) -->
+<script src="https://unpkg.com/jshint@2.13.6/dist/jshint.js"></script> <!-- JSHint for JS -->
+<script src="https://unpkg.com/jsonlint@1.6.3/web/jsonlint.js"></script> <!-- JSONLint (though CM might use built-in) -->
+<script src="https://unpkg.com/csslint@1.0.5/dist/csslint.js"></script> <!-- CSSLint -->
+<script src="https://unpkg.com/htmlhint@1.1.4/dist/htmlhint.js"></script> <!-- HTMLHint -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script> <!-- js-yaml for YAML -->
+<!-- CM Lint Bridges -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/javascript-lint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/json-lint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/css-lint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/html-lint.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/yaml-lint.min.js"></script>
+<!-- CodeMirror Modes (Alphabetical - Add dependencies first if known) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/xml/xml.min.js"></script> <!-- Dependency for HTML, etc. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script> <!-- Dependency for HTML, PHP, TS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script> <!-- Dependency for HTML -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"></script> <!-- Depends on XML, JS, CSS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/clike/clike.min.js"></script> <!-- C, C++, C#, Java, Scala, Kotlin, Obj-C -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/go/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/lua/lua.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/markdown/markdown.min.js"></script> <!-- Depends on XML sometimes -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/perl/perl.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/php/php.min.js"></script> <!-- Depends on clike, htmlmixed, xml, js, css -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/r/r.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/ruby/ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/rust/rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/shell/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/swift/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/yaml/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script> <!-- Ensure JS is loaded for TS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/typescript/typescript.min.js"></script>
+<!-- CodeMirror Themes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/monokai.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/eclipse.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/base16-light.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/solarized.min.css">
+<style>
+/* General Styles */
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+margin: 0;
+padding: 0;
+background-color: #282a36; /* Default: Dracula background */
+color: #f8f8f2; /* Default: Dracula foreground */
+display: flex;
+flex-direction: column;
+height: 100vh;
+overflow: hidden;
+transition: background-color 0.3s, color 0.3s; /* Smooth theme transitions */
+}
 
-  <!-- CodeMirror Core -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+/* Layout Containers */
+.navbar, .toolbar, .find-replace-container, .status-bar {
+flex-shrink: 0; /* Prevent shrinking */
+}
+.editor-container {
+flex: 1;
+display: flex;
+min-height: 0; /* Crucial for flex shrinking */
+}
+.sidebar {
+width: 200px;
+background-color: #353746;
+padding: 10px;
+overflow-y: auto;
+flex-shrink: 0;
+display: flex;
+flex-direction: column;
+}
+.main-content {
+flex: 1;
+display: flex;
+flex-direction: column;
+min-width: 0; /* Crucial for flex shrinking */
+}
+#editor {
+flex: 1;
+position: relative; /* Needed for CodeMirror sizing */
+overflow: hidden;
+min-height: 0; /* Crucial for flex shrinking */
+}
 
-  <!-- CodeMirror Addons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/dialog/dialog.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/search/search.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/search/searchcursor.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/dialog/dialog.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/closebrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/javascript-hint.min.js"></script>
+/* Navbar */
+.navbar {
+background-color: #44475a;
+padding: 10px 15px; /* Slightly more padding */
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.brand {
+font-size: 1.5rem;
+font-weight: bold;
+color: #bd93f9;
+}
 
-  <!-- CodeMirror Modes -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/xml/xml.min.js"></script>
+/* Toolbar */
+.toolbar {
+display: flex;
+gap: 8px; /* Slightly reduced gap */
+background-color: #373a49;
+padding: 8px 15px; /* Match navbar horizontal padding */
+align-items: center; /* Align items vertically */
+}
 
-  <!-- CodeMirror Themes -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/dracula.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/monokai.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/eclipse.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/base16-light.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/solarized.min.css">
+/* General Button Styling */
+button {
+background-color: #50fa7b;
+color: #282a36;
+border: none;
+padding: 6px 12px; /* Default padding */
+border-radius: 4px; /* Default rounding */
+cursor: pointer;
+font-weight: bold;
+transition: background-color 0.2s, opacity 0.2s;
+font-size: 0.9rem; /* Standardize font size */
+line-height: 1.2; /* Ensure text is centered */
+}
+button:hover {
+filter: brightness(1.1); /* General hover effect */
+}
+button:disabled {
+background-color: #6272a4 !important; /* Use important to override specifics */
+cursor: not-allowed;
+opacity: 0.6;
+}
+
+/* Specific Button Colors */
+.danger { background-color: #ff5555; }
+.primary { background-color: #8be9fd; }
+.secondary { background-color: #bd93f9; }
+
+/* Style for Toolbar Primary Buttons */
+.toolbar button.primary {
+padding: 5px 8px; /* Make smaller */
+border-radius: 0; /* Make square */
+font-size: 0.85rem; /* Slightly smaller font */
+}
+
+/* Sidebar */
+.sidebar h4 {
+margin: 0 0 10px 0;
+flex-shrink: 0;
+color: #bd93f9; /* Match brand color */
+font-size: 1rem;
+}
+.file-list {
+list-style: none;
+padding: 0;
+margin: 0;
+overflow-y: auto;
+flex-grow: 1;
+}
+.file-item {
+padding: 6px 8px; /* Adjust padding */
+margin-bottom: 3px;
+background-color: #44475a;
+border-radius: 3px; /* Slight rounding */
+cursor: pointer;
+display: flex;
+justify-content: space-between;
+align-items: center;
+font-size: 0.85rem; /* Smaller font for file names */
+transition: background-color 0.15s;
+}
+.file-item:hover { background-color: #50536b; }
+.file-item.active { background-color: #6272a4; font-weight: bold; }
+.file-name {
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+margin-right: 5px;
+}
+.file-name .unsaved-indicator { color: #ffb86c; margin-left: 2px; }
+.file-remove {
+background: none; border: none; color: #ff5555; cursor: pointer;
+font-size: 1rem; line-height: 1; padding: 0 2px; margin-left: auto;
+flex-shrink: 0; opacity: 0.7; transition: opacity 0.15s, color 0.15s;
+}
+.file-remove:hover { color: #ff7777; opacity: 1; }
+
+/* Editor */
+.CodeMirror {
+height: 100% !important; /* Override CM default */
+font-size: 14px;
+}
+/* Ensure scrollbars match theme */
+.cm-s-dracula .CodeMirror-scrollbar-filler, .cm-s-dracula .CodeMirror-gutter-filler { background-color: #282a36; }
+.cm-s-dracula .CodeMirror-vscrollbar::-webkit-scrollbar-thumb { background-color: #44475a; }
+.cm-s-dracula .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover { background-color: #6272a4; }
+/* Add basic scrollbar styling for other themes (may need specific overrides) */
+.CodeMirror-vscrollbar::-webkit-scrollbar { width: 10px; }
+.CodeMirror-vscrollbar::-webkit-scrollbar-track { background: rgba(128,128,128,0.1); }
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.4); border-radius: 4px;}
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.6); }
+
+/* Linting Marker Style */
+.CodeMirror-lint-marker-error, .CodeMirror-lint-marker-warning {
+background-position: left bottom;
+background-repeat: repeat-x;
+}
+.CodeMirror-lint-marker-error {
+background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAABJJREFUCB1j8DNk+M8wrrVfJQARAADO8SKkAX27wQAAAABJRU5ErkJggg=="); /* Red underline */
+}
+.CodeMirror-lint-marker-warning {
+background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAABRJREFUCB1j8Mvg/p+B6f8zVBEBAB59Ek9VRGuSAAAAAElFTkSuQmCC"); /* Yellow underline */
+}
+.CodeMirror-lint-tooltip { /* Style the tooltip that appears on hover */
+background-color: #44475a !important;
+border: 1px solid #6272a4 !important;
+color: #f8f8f2 !important;
+padding: 5px 8px !important;
+border-radius: 4px !important;
+font-size: 0.85em !important;
+z-index: 15 !important; /* Ensure it's above editor content */
+}
 
 
-  <style>
-    /* General Styles */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #282a36; /* Default: Dracula background */
-      color: #f8f8f2;       /* Default: Dracula foreground */
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      transition: background-color 0.3s, color 0.3s; /* Smooth theme transitions */
-    }
+/* AI Suggestion Style */
+.cm-ai-suggestion {
+color: #888; /* Grey color for suggestion */
+font-style: italic;
+}
 
-    /* Layout Containers */
-    .navbar, .toolbar, .find-replace-container, .status-bar {
-      flex-shrink: 0; /* Prevent shrinking */
-    }
-    .editor-container {
-      flex: 1;
-      display: flex;
-      min-height: 0;
-    }
-    .sidebar {
-      width: 200px;
-      background-color: #353746;
-      padding: 10px;
-      overflow-y: auto;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-    #editor {
-        flex: 1;
-        position: relative;
-        overflow: hidden;
-        min-height: 0;
-    }
+/* Modals */
+.modal {
+display: none; position: fixed; z-index: 10; left: 0; top: 0;
+width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7);
+}
+.modal-content {
+background-color: #44475a; margin: 12% auto; padding: 25px; /* More padding */
+border-radius: 6px; width: 450px; max-width: 90%;
+box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.modal-header {
+display: flex; justify-content: space-between; align-items: center;
+margin-bottom: 20px; border-bottom: 1px solid #6272a4; padding-bottom: 15px;
+}
+.modal-header h3 { margin: 0; color: #bd93f9; font-size: 1.3rem;}
+.modal-close {
+color: #aaa; font-size: 30px; font-weight: bold; cursor: pointer;
+line-height: 1; padding: 0 5px; transition: color 0.15s;
+}
+.modal-close:hover, .modal-close:focus { color: #ff5555; text-decoration: none; outline: none; }
+.form-group { margin-bottom: 18px; }
+label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 0.9em; }
+input[type="text"], select {
+box-sizing: border-box; width: 100%; padding: 10px; border-radius: 4px;
+border: 1px solid #6272a4; background-color: #282a36; color: #f8f8f2; font-size: 1em;
+}
+input[type="text"]:focus, select:focus {
+outline: none; border-color: #bd93f9;
+box-shadow: 0 0 0 2px rgba(189, 147, 249, 0.3); /* Subtle focus ring */
+}
+.modal-actions {
+display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;
+padding-top: 15px; border-top: 1px solid #6272a4;
+}
 
-    /* Navbar */
-    .navbar {
-      background-color: #44475a;
-      padding: 10px 15px; /* Slightly more padding */
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .brand {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #bd93f9;
-    }
+/* Status Bar */
+.status-bar {
+background-color: #1e1f29; padding: 4px 15px; font-size: 0.8rem;
+display: flex; justify-content: space-between; align-items: center;
+color: #a0a8b0;
+}
+#cursorPosition { margin-left: 15px; } /* Push cursor pos to the right */
+#statusMessage {
+margin-left: 15px; /* Add some spacing */
+font-style: italic;
+color: #ffb86c; /* Orange color for status */
+flex-grow: 1; /* Allow it to take available space */
+text-align: center; /* Center the message */
+}
 
-    /* Toolbar */
-    .toolbar {
-      display: flex;
-      gap: 8px; /* Slightly reduced gap */
-      background-color: #373a49;
-      padding: 8px 15px; /* Match navbar horizontal padding */
-      align-items: center; /* Align items vertically */
-    }
+/* Language Select */
+.language-select {
+background-color: #44475a; color: #f8f8f2; border: 1px solid #6272a4;
+border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; margin-left: auto; /* Push to right */
+max-width: 150px; /* Prevent it from getting too wide */
+}
+.language-select:disabled { opacity: 0.6; background-color: #6272a4; }
+.language-select:focus { outline: none; border-color: #bd93f9; }
 
-    /* General Button Styling */
-    button {
-      background-color: #50fa7b;
-      color: #282a36;
-      border: none;
-      padding: 6px 12px; /* Default padding */
-      border-radius: 4px;  /* Default rounding */
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.2s, opacity 0.2s;
-      font-size: 0.9rem; /* Standardize font size */
-      line-height: 1.2; /* Ensure text is centered */
-    }
-    button:hover {
-      filter: brightness(1.1); /* General hover effect */
-    }
-    button:disabled {
-        background-color: #6272a4 !important; /* Use important to override specifics */
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+/* Find/Replace Bar */
+.find-replace-container {
+display: none; gap: 8px; background-color: #373a49; padding: 8px 15px;
+border-bottom: 1px solid #282a36; align-items: center;
+}
+.find-replace-container input[type="text"] {
+flex: 1; padding: 5px 8px; font-size: 0.9rem; min-width: 120px;
+}
+.search-actions { display: flex; gap: 5px; }
+.search-actions button { padding: 4px 8px; font-size: 0.85rem; }
+#closeFindBtn {
+margin-left: 5px; padding: 2px 6px; font-size: 1rem; line-height: 1;
+background-color: #ff5555; /* Match danger color */
+}
 
-    /* Specific Button Colors */
-    .danger { background-color: #ff5555; }
-    .primary { background-color: #8be9fd; }
-    .secondary { background-color: #bd93f9; }
-
-    /* Style for Toolbar Primary Buttons */
-    .toolbar button.primary {
-        padding: 5px 8px;   /* Make smaller */
-        border-radius: 0;   /* Make square */
-        font-size: 0.85rem; /* Slightly smaller font */
-    }
-
-    /* Sidebar */
-    .sidebar h4 {
-        margin: 0 0 10px 0;
-        flex-shrink: 0;
-        color: #bd93f9; /* Match brand color */
-        font-size: 1rem;
-    }
-    .file-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      overflow-y: auto;
-      flex-grow: 1;
-    }
-    .file-item {
-      padding: 6px 8px; /* Adjust padding */
-      margin-bottom: 3px;
-      background-color: #44475a;
-      border-radius: 3px; /* Slight rounding */
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem; /* Smaller font for file names */
-      transition: background-color 0.15s;
-    }
-    .file-item:hover { background-color: #50536b; }
-    .file-item.active { background-color: #6272a4; font-weight: bold; }
-    .file-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-right: 5px;
-    }
-    .file-name .unsaved-indicator { color: #ffb86c; margin-left: 2px; }
-    .file-remove {
-      background: none; border: none; color: #ff5555; cursor: pointer;
-      font-size: 1rem; line-height: 1; padding: 0 2px; margin-left: auto;
-      flex-shrink: 0; opacity: 0.7; transition: opacity 0.15s, color 0.15s;
-    }
-    .file-remove:hover { color: #ff7777; opacity: 1; }
-
-    /* Editor */
-    .CodeMirror {
-      height: 100%;
-      font-size: 14px;
-    }
-    /* Ensure scrollbars match theme */
-    .cm-s-dracula .CodeMirror-scrollbar-filler, .cm-s-dracula .CodeMirror-gutter-filler { background-color: #282a36; }
-    .cm-s-dracula .CodeMirror-vscrollbar::-webkit-scrollbar-thumb { background-color: #44475a; }
-    .cm-s-dracula .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover { background-color: #6272a4; }
-    /* Add basic scrollbar styling for other themes (may need specific overrides) */
-    .CodeMirror-vscrollbar::-webkit-scrollbar { width: 10px; }
-    .CodeMirror-vscrollbar::-webkit-scrollbar-track { background: rgba(128,128,128,0.1); }
-    .CodeMirror-vscrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.4); border-radius: 4px;}
-    .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.6); }
-
-    /* AI Suggestion Style */
-    .cm-ai-suggestion {
-      color: #888; /* Grey color for suggestion */
-      font-style: italic;
-    }
-
-    /* Modals */
-    .modal {
-      display: none; position: fixed; z-index: 10; left: 0; top: 0;
-      width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7);
-    }
-    .modal-content {
-      background-color: #44475a; margin: 12% auto; padding: 25px; /* More padding */
-      border-radius: 6px; width: 450px; max-width: 90%;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    }
-    .modal-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 20px; border-bottom: 1px solid #6272a4; padding-bottom: 15px;
-    }
-    .modal-header h3 { margin: 0; color: #bd93f9; font-size: 1.3rem;}
-    .modal-close {
-      color: #aaa; font-size: 30px; font-weight: bold; cursor: pointer;
-      line-height: 1; padding: 0 5px; transition: color 0.15s;
-    }
-    .modal-close:hover, .modal-close:focus { color: #ff5555; text-decoration: none; outline: none; }
-    .form-group { margin-bottom: 18px; }
-    label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 0.9em; }
-    input[type="text"], select {
-      box-sizing: border-box; width: 100%; padding: 10px; border-radius: 4px;
-      border: 1px solid #6272a4; background-color: #282a36; color: #f8f8f2; font-size: 1em;
-    }
-    input[type="text"]:focus, select:focus {
-      outline: none; border-color: #bd93f9;
-      box-shadow: 0 0 0 2px rgba(189, 147, 249, 0.3); /* Subtle focus ring */
-    }
-    .modal-actions {
-      display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;
-      padding-top: 15px; border-top: 1px solid #6272a4;
-    }
-
-    /* Status Bar */
-    .status-bar {
-      background-color: #1e1f29; padding: 4px 15px; font-size: 0.8rem;
-      display: flex; justify-content: space-between; align-items: center;
-      color: #a0a8b0;
-    }
-    #cursorPosition { margin-left: 15px; } /* Push cursor pos to the right */
-    #statusMessage {
-        margin-left: 15px; /* Add some spacing */
-        font-style: italic;
-        color: #ffb86c; /* Orange color for status */
-        flex-grow: 1; /* Allow it to take available space */
-        text-align: center; /* Center the message */
-    }
-
-    /* Language Select */
-    .language-select {
-      background-color: #44475a; color: #f8f8f2; border: 1px solid #6272a4;
-      border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; margin-left: auto; /* Push to right */
-    }
-    .language-select:disabled { opacity: 0.6; background-color: #6272a4; }
-    .language-select:focus { outline: none; border-color: #bd93f9; }
-
-    /* Find/Replace Bar */
-    .find-replace-container {
-      display: none; gap: 8px; background-color: #373a49; padding: 8px 15px;
-      border-bottom: 1px solid #282a36; align-items: center;
-    }
-    .find-replace-container input[type="text"] {
-      flex: 1; padding: 5px 8px; font-size: 0.9rem; min-width: 120px;
-    }
-    .search-actions { display: flex; gap: 5px; }
-    .search-actions button { padding: 4px 8px; font-size: 0.85rem; }
-    #closeFindBtn {
-         margin-left: 5px; padding: 2px 6px; font-size: 1rem; line-height: 1;
-         background-color: #ff5555; /* Match danger color */
-    }
-
-  </style>
+</style>
 </head>
 <body>
-  <div class="navbar">
-    <div class="brand">LLamaEdit</div>
-    <div>
-      <button id="themeToggle" class="secondary" title="Cycle Theme">Cycle Theme</button>
-    </div>
-  </div>
+<div class="navbar">
+<div class="brand">LLamaEdit</div>
+<div>
+<button id="themeToggle" class="secondary" title="Cycle Theme">Cycle Theme</button>
+</div>
+</div>
+<div class="toolbar">
+<!-- Toolbar buttons ... -->
+<button id="newFileBtn" class="primary" title="New File (Ctrl+N)">New</button>
+<button id="openFileBtn" class="primary" title="Open File (Ctrl+O)">Open</button>
+<button id="saveFileBtn" class="primary" title="Save (Ctrl+S)" disabled>Save</button>
+<button id="saveAsBtn" class="primary" title="Save As (Ctrl+Shift+S)" disabled>Save As</button>
+<button id="findReplaceBtn" class="secondary" title="Find & Replace (Ctrl+F)">Find/Replace</button>
+<select id="languageSelect" class="language-select" title="Select Language" disabled>
+<!-- Updated Language Options -->
+<option value="javascript">JavaScript</option>
+<option value="typescript">TypeScript</option>
+<option value="htmlmixed">HTML</option>
+<option value="css">CSS</option>
+<option value="python">Python</option>
+<option value="java">Java</option>
+<option value="text/x-c++src">C++</option>
+<option value="text/x-csharp">C#</option>
+<option value="php">PHP</option>
+<option value="ruby">Ruby</option>
+<option value="go">Go</option>
+<option value="swift">Swift</option>
+<option value="rust">Rust</option>
+<option value="kotlin">Kotlin</option>
+<option value="scala">Scala</option>
+<option value="sql">SQL</option>
+<option value="shell">Shell Script</option>
+<option value="perl">Perl</option>
+<option value="r">R</option>
+<option value="lua">Lua</option>
+<option value="markdown">Markdown</option>
+<option value="yaml">YAML</option>
+<option value="xml">XML</option>
+<option value="text/plain">Plain Text</option>
+<!-- Add other C-like variants if needed, e.g., text/x-csrc -->
+</select>
+</div>
+<div class="find-replace-container" id="findReplaceContainer">
+<!-- Find/Replace elements ... -->
+<input type="text" id="findInput" placeholder="Find...">
+<input type="text" id="replaceInput" placeholder="Replace with...">
+<div class="search-actions">
+<button id="findPrevBtn" class="secondary" title="Find Previous (Shift+Enter)">Prev</button>
+<button id="findNextBtn" class="secondary" title="Find Next (Enter)">Next</button>
+<button id="replaceBtn" class="secondary" title="Replace Current">Replace</button>
+<button id="replaceAllBtn" class="secondary" title="Replace All">Replace All</button>
+<button id="closeFindBtn" class="danger" title="Close (Esc)">&times;</button>
+</div>
+</div>
+<div class="editor-container">
+<div class="sidebar">
+<h4>Files</h4>
+<ul class="file-list" id="fileList"></ul>
+</div>
+<div class="main-content">
+<div id="editor"></div>
+</div>
+</div>
+<div class="status-bar">
+<div id="fileInfo">No file opened</div>
+<div id="statusMessage"></div>
+<div id="cursorPosition">Ln 1, Col 1</div>
+</div>
+<!-- New File Modal -->
+<div id="newFileModal" class="modal">
+<div class="modal-content">
+<div class="modal-header">
+<h3>Create New File</h3>
+<span class="modal-close" id="closeNewFileModal" title="Close">&times;</span>
+</div>
+<div class="form-group">
+<label for="newFileName">File Name:</label>
+<input type="text" id="newFileName" placeholder="e.g., script.js, main.py">
+</div>
+<div class="form-group">
+<label for="newFileLanguage">Language:</label>
+<select id="newFileLanguage">
+<!-- Updated Language Options -->
+<option value="javascript">JavaScript (.js)</option>
+<option value="typescript">TypeScript (.ts)</option>
+<option value="htmlmixed">HTML (.html)</option>
+<option value="css">CSS (.css)</option>
+<option value="python">Python (.py)</option>
+<option value="java">Java (.java)</option>
+<option value="text/x-c++src">C++ (.cpp)</option>
+<option value="text/x-csharp">C# (.cs)</option>
+<option value="php">PHP (.php)</option>
+<option value="ruby">Ruby (.rb)</option>
+<option value="go">Go (.go)</option>
+<option value="swift">Swift (.swift)</option>
+<option value="rust">Rust (.rs)</option>
+<option value="kotlin">Kotlin (.kt)</option>
+<option value="scala">Scala (.scala)</option>
+<option value="sql">SQL (.sql)</option>
+<option value="shell">Shell Script (.sh)</option>
+<option value="perl">Perl (.pl)</option>
+<option value="r">R (.r)</option>
+<option value="lua">Lua (.lua)</option>
+<option value="markdown">Markdown (.md)</option>
+<option value="yaml">YAML (.yaml, .yml)</option>
+<option value="xml">XML (.xml)</option>
+<option value="text/plain">Plain Text (.txt)</option>
+</select>
+</div>
+<div class="modal-actions">
+<button id="cancelNewFile" class="secondary">Cancel</button>
+<button id="createNewFile" class="primary">Create</button>
+</div>
+</div>
+</div>
+<!-- Save As Modal -->
+<div id="saveAsModal" class="modal">
+<div class="modal-content">
+<div class="modal-header">
+<h3>Save File As</h3>
+<span class="modal-close" id="closeSaveAsModal" title="Close">&times;</span>
+</div>
+<div class="form-group">
+<label for="saveAsFileName">File Name:</label>
+<input type="text" id="saveAsFileName" placeholder="example.js">
+</div>
+<div class="modal-actions">
+<button id="cancelSaveAs" class="secondary">Cancel</button>
+<button id="confirmSaveAs" class="primary">Save</button>
+</div>
+</div>
+</div>
+<script>
+// Make linters available globally for CodeMirror addons
+window.JSHINT = JSHINT;
+window.CSSLint = CSSLint;
+window.HTMLHint = HTMLHint;
+window.jsyaml = jsyaml; // Make js-yaml available
 
-  <div class="toolbar">
-    <!-- Toolbar buttons ... -->
-    <button id="newFileBtn" class="primary" title="New File (Ctrl+N)">New</button>
-    <button id="openFileBtn" class="primary" title="Open File (Ctrl+O)">Open</button>
-    <button id="saveFileBtn" class="primary" title="Save (Ctrl+S)" disabled>Save</button>
-    <button id="saveAsBtn" class="primary" title="Save As (Ctrl+Shift+S)" disabled>Save As</button>
-    <button id="findReplaceBtn" class="secondary" title="Find & Replace (Ctrl+F)">Find/Replace</button>
-    <select id="languageSelect" class="language-select" title="Select Language" disabled>
-      <option value="javascript">JavaScript</option>
-      <option value="htmlmixed">HTML</option>
-      <option value="css">CSS</option>
-      <option value="xml">XML</option>
-      <option value="text/plain">Plain Text</option>
-    </select>
-  </div>
+// --- AI Configuration ---
+const LLAMA_API_URL = 'http://localhost:8080/completion'; // <<< Your Llama.cpp server URL
+const AI_COMPLETION_MAX_TOKENS = 128;
+const AI_COMPLETION_STOP_TOKENS = []; // ["\n", "\t", ";", "}", ")", "<|EOT|>"];
+const AI_PROMPT_MAX_CHARS = 2048;
 
-  <div class="find-replace-container" id="findReplaceContainer">
-    <!-- Find/Replace elements ... -->
-    <input type="text" id="findInput" placeholder="Find...">
-    <input type="text" id="replaceInput" placeholder="Replace with...">
-    <div class="search-actions">
-      <button id="findPrevBtn" class="secondary" title="Find Previous (Shift+Enter)">Prev</button>
-      <button id="findNextBtn" class="secondary" title="Find Next (Enter)">Next</button>
-      <button id="replaceBtn" class="secondary" title="Replace Current">Replace</button>
-      <button id="replaceAllBtn" class="secondary" title="Replace All">Replace All</button>
-      <button id="closeFindBtn" class="danger" title="Close (Esc)">&times;</button>
-    </div>
-  </div>
+// --- State Variables ---
+let files = [];
+let currentFileIndex = -1;
+let editor;
+let lastSearch = { query: null, cursor: null, findInputEl: null, replaceInputEl: null };
+let isAICompleting = false;
+let activeSuggestionMarker = null;
+let isInsertingAISuggestion = false;
 
-  <div class="editor-container">
-    <div class="sidebar">
-      <h4>Files</h4>
-      <ul class="file-list" id="fileList"></ul>
-    </div>
-    <div class="main-content">
-      <div id="editor"></div>
-    </div>
-  </div>
+// Theme Management
+const themes = [ "dracula", "material", "monokai", "solarized dark", "default", "eclipse", "base16-light", "solarized light" ];
+const themeTypes = { "dracula": "dark", "material": "dark", "monokai": "dark", "solarized dark": "dark", "default": "light", "eclipse": "light", "base16-light": "light", "solarized light": "light" };
+let currentThemeIndex = 0;
 
-  <div class="status-bar">
-    <div id="fileInfo">No file opened</div>
-    <div id="statusMessage"></div>
-    <div id="cursorPosition">Ln 1, Col 1</div>
-  </div>
-
-
-  <!-- New File Modal -->
-  <div id="newFileModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Create New File</h3>
-        <span class="modal-close" id="closeNewFileModal" title="Close">&times;</span>
-      </div>
-      <div class="form-group">
-        <label for="newFileName">File Name:</label>
-        <input type="text" id="newFileName" placeholder="e.g., script.js, index.html">
-      </div>
-      <div class="form-group">
-        <label for="newFileLanguage">Language:</label>
-        <select id="newFileLanguage">
-          <option value="javascript">JavaScript (.js)</option>
-          <option value="htmlmixed">HTML (.html)</option>
-          <option value="css">CSS (.css)</option>
-          <option value="xml">XML (.xml)</option>
-          <option value="text/plain">Plain Text (.txt)</option>
-        </select>
-      </div>
-      <div class="modal-actions">
-        <button id="cancelNewFile" class="secondary">Cancel</button>
-        <button id="createNewFile" class="primary">Create</button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Save As Modal -->
-  <div id="saveAsModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Save File As</h3>
-        <span class="modal-close" id="closeSaveAsModal" title="Close">&times;</span>
-      </div>
-      <div class="form-group">
-        <label for="saveAsFileName">File Name:</label>
-        <input type="text" id="saveAsFileName" placeholder="example.js">
-      </div>
-      <div class="modal-actions">
-        <button id="cancelSaveAs" class="secondary">Cancel</button>
-        <button id="confirmSaveAs" class="primary">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // --- AI Configuration ---
-    const LLAMA_API_URL = 'http://localhost:8080/completion'; // <<< Your Llama.cpp server URL
-    const AI_COMPLETION_MAX_TOKENS = 128; // Max tokens to request from AI (Increased for testing)
-    const AI_COMPLETION_STOP_TOKENS = []; // ["\n", "\t", ";", "}", ")", "<|EOT|>"]; // Stop tokens temporarily removed for testing
-    const AI_PROMPT_MAX_CHARS = 2048; // Limit context sent to AI
-
-    // --- State Variables ---
-    let files = [];
-    let currentFileIndex = -1;
-    let editor;
-    let lastSearch = { query: null, cursor: null, findInputEl: null, replaceInputEl: null };
-    let isAICompleting = false; // Flag to prevent concurrent AI requests
-    let activeSuggestionMarker = null; // To hold the current suggestion marker
-    let isInsertingAISuggestion = false; // Flag to track AI insertion state
-
-    // Theme Management
-    const themes = [ "dracula", "material", "monokai", "solarized dark", "default", "eclipse", "base16-light", "solarized light" ];
-    const themeTypes = { "dracula": "dark", "material": "dark", "monokai": "dark", "solarized dark": "dark", "default": "light", "eclipse": "light", "base16-light": "light", "solarized light": "light" };
-    let currentThemeIndex = 0; // Start with Dracula
-
-    // --- DOM Element References ---
-    const fileListEl = document.getElementById("fileList");
-    const editorContainerEl = document.getElementById("editor");
-    const cursorPositionEl = document.getElementById("cursorPosition");
-    const fileInfoEl = document.getElementById("fileInfo");
-    const languageSelectEl = document.getElementById("languageSelect");
-    const saveFileBtn = document.getElementById("saveFileBtn");
-    const saveAsBtn = document.getElementById("saveAsBtn");
-    const findReplaceContainerEl = document.getElementById("findReplaceContainer");
-    const findInputEl = document.getElementById("findInput");
-    const replaceInputEl = document.getElementById("replaceInput");
-    lastSearch.findInputEl = findInputEl;
-    lastSearch.replaceInputEl = replaceInputEl;
-    const newFileModal = document.getElementById("newFileModal");
-    const saveAsModal = document.getElementById("saveAsModal");
-    const newFileNameInput = document.getElementById("newFileName");
-    const newFileLangSelect = document.getElementById("newFileLanguage");
-    const saveAsFileNameInput = document.getElementById("saveAsFileName");
-    const statusMessageEl = document.getElementById("statusMessage");
-
-
-    // --- Initialization ---
-    function initEditor() {
-      editor = CodeMirror(editorContainerEl, {
-        mode: "javascript",
-        theme: themes[currentThemeIndex],
-        lineNumbers: true,
-        matchBrackets: true,
-        autoCloseBrackets: true,
-        indentUnit: 2,
-        tabSize: 2,
-        indentWithTabs: false,
-        lineWrapping: false,
-        gutters: ["CodeMirror-linenumbers"],
-        extraKeys: {
-          "Ctrl-Space": "autocomplete",
-          "Ctrl-F": "findPersistent",
-          "Cmd-F": "findPersistent",
-          "Ctrl-H": "replace",
-          "Cmd-Option-F": "replace",
-          "Esc": function(cm) {
-            if (activeSuggestionMarker) {
-                clearActiveSuggestion(false); return;
-            }
-            if (findReplaceContainerEl.style.display !== 'none') {
-                 toggleFindReplace(false); return CodeMirror.Pass;
-            }
-            return CodeMirror.Pass;
-          },
-          "Alt-\\": function(cm) {
-            triggerAICompletion();
-          },
-          "Tab": function(cm) {
-              if (activeSuggestionMarker) {
-                  clearActiveSuggestion(true); return;
-              }
-              return CodeMirror.Pass;
-          }
-        }
-      });
-
-      editor.on("cursorActivity", handleCursorActivity);
-      editor.on("change", handleEditorChange);
-
-      applyBodyThemeStyles(themes[currentThemeIndex]);
-      updateUIForFileStatus();
-    }
-
-    // --- UI Update Functions ---
-    function handleCursorActivity() {
-        const cursor = editor.getCursor();
-        cursorPositionEl.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
-
-        if (activeSuggestionMarker) {
-            const markerRange = activeSuggestionMarker.find();
-            if (markerRange) {
-                const currentCursor = editor.getCursor();
-                if (CodeMirror.cmpPos(currentCursor, markerRange.from) < 0 ||
-                    CodeMirror.cmpPos(currentCursor, markerRange.to) > 0) {
-                     clearActiveSuggestion(false);
-                }
-            } else {
-                 clearActiveSuggestion(false);
-            }
-        }
-    }
-
-    function handleEditorChange(cm, change) {
-        // Ignore changes made *while* the AI suggestion is being inserted
-        if (isInsertingAISuggestion) {
-            console.log("Ignoring change event during AI suggestion insertion.");
-            return;
-        }
-
-        // Reject suggestion on subsequent user changes
-        if (activeSuggestionMarker) {
-             console.log("Clearing suggestion due to user change (origin:", change.origin, ")");
-             clearActiveSuggestion(false);
-        }
-
-        // Unsaved logic
-        if (currentFileIndex >= 0 && files[currentFileIndex] && !files[currentFileIndex].unsaved) {
-            if (!change.removed || !activeSuggestionMarker) { // Avoid marking unsaved just by rejecting
-                 files[currentFileIndex].unsaved = true;
-                 updateFileList();
-                 updateFileInfo();
-                 updateSaveButtonState();
-             }
-        }
-    }
-
-    function updateFileList() {
-        fileListEl.innerHTML = "";
-        if (files.length === 0) {
-            const li = document.createElement("li"); li.textContent = "No files open"; li.style.padding = "8px"; li.style.color = "#a0a8b0"; li.style.fontSize = "0.85rem"; fileListEl.appendChild(li); return;
-        }
-        files.forEach((file, index) => {
-            const li = document.createElement("li"); li.className = `file-item ${index === currentFileIndex ? "active" : ""}`; li.title = file.name; li.dataset.index = index; li.onclick = () => openFileByIndex(index);
-            const nameSpan = document.createElement("span"); nameSpan.className = "file-name"; nameSpan.textContent = file.name;
-            if (file.unsaved) {
-                const unsavedIndicator = document.createElement("span"); unsavedIndicator.className = "unsaved-indicator"; unsavedIndicator.textContent = "*"; unsavedIndicator.title = "Unsaved changes"; nameSpan.appendChild(unsavedIndicator);
-            }
-            const removeBtn = document.createElement("button"); removeBtn.className = "file-remove"; removeBtn.innerHTML = "&times;"; removeBtn.title = `Close ${file.name}`; removeBtn.dataset.index = index; removeBtn.onclick = (e) => { e.stopPropagation(); removeFile(index); };
-            li.appendChild(nameSpan); li.appendChild(removeBtn); fileListEl.appendChild(li);
-        });
-    }
-    function updateFileInfo() {
-        if (currentFileIndex >= 0 && files[currentFileIndex]) {
-            const file = files[currentFileIndex]; fileInfoEl.textContent = `${file.name}${file.unsaved ? " (unsaved)" : ""}`; languageSelectEl.value = file.language;
-        } else {
-            fileInfoEl.textContent = "No file opened"; languageSelectEl.value = "text/plain"; cursorPositionEl.textContent = `Ln 1, Col 1`;
-        }
-    }
-    function updateSaveButtonState() {
-        const canSave = currentFileIndex >= 0 && files[currentFileIndex] && files[currentFileIndex].unsaved; saveFileBtn.disabled = !canSave; saveAsBtn.disabled = !(currentFileIndex >= 0 && files[currentFileIndex]);
-    }
-    function updateLanguageDropdownState() {
-        languageSelectEl.disabled = !(currentFileIndex >= 0 && files[currentFileIndex]);
-    }
-    function updateUIForFileStatus() {
-        updateFileList(); updateFileInfo(); updateSaveButtonState(); updateLanguageDropdownState();
-    }
-    function setStatusMessage(message = "", isError = false) {
-        statusMessageEl.textContent = message; statusMessageEl.style.color = isError ? "#ff5555" : "#ffb86c";
-    }
+// --- DOM Element References ---
+const fileListEl = document.getElementById("fileList");
+const editorContainerEl = document.getElementById("editor");
+const cursorPositionEl = document.getElementById("cursorPosition");
+const fileInfoEl = document.getElementById("fileInfo");
+const languageSelectEl = document.getElementById("languageSelect");
+const saveFileBtn = document.getElementById("saveFileBtn");
+const saveAsBtn = document.getElementById("saveAsBtn");
+const findReplaceContainerEl = document.getElementById("findReplaceContainer");
+const findInputEl = document.getElementById("findInput");
+const replaceInputEl = document.getElementById("replaceInput");
+lastSearch.findInputEl = findInputEl;
+lastSearch.replaceInputEl = replaceInputEl;
+const newFileModal = document.getElementById("newFileModal");
+const saveAsModal = document.getElementById("saveAsModal");
+const newFileNameInput = document.getElementById("newFileName");
+const newFileLangSelect = document.getElementById("newFileLanguage");
+const saveAsFileNameInput = document.getElementById("saveAsFileName");
+const statusMessageEl = document.getElementById("statusMessage");
 
 
-    // --- File Management Logic ---
-    // <<< MODIFICATION: Fixed setActiveFile >>>
-    function setActiveFile(index) {
-        console.log(`setActiveFile called with index: ${index}`);
-        clearActiveSuggestion(false); // Clear suggestion when switching files
+// --- Initialization ---
+function initEditor() {
+editor = CodeMirror(editorContainerEl, {
+mode: "javascript", // Default mode
+theme: themes[currentThemeIndex],
+lineNumbers: true,
+matchBrackets: true,
+autoCloseBrackets: true,
+indentUnit: 2,
+tabSize: 2,
+indentWithTabs: false,
+lineWrapping: false,
+gutters: ["CodeMirror-linenumbers", "CodeMirror-lint-markers"], // Added lint gutter
+lint: true, // Enable linting addon
+extraKeys: {
+"Ctrl-Space": "autocomplete",
+"Ctrl-F": "findPersistent",
+"Cmd-F": "findPersistent",
+"Ctrl-H": "replace",
+"Cmd-Option-F": "replace",
+"Esc": function(cm) {
+if (activeSuggestionMarker) {
+clearActiveSuggestion(false); return;
+}
+if (findReplaceContainerEl.style.display !== 'none') {
+toggleFindReplace(false); return CodeMirror.Pass;
+}
+// Close lint tooltips if any are open
+const lintTooltips = document.querySelectorAll('.CodeMirror-lint-tooltip');
+let closedTooltip = false;
+lintTooltips.forEach(tip => {
+if (tip && tip.parentNode) {
+tip.parentNode.removeChild(tip);
+closedTooltip = true;
+}
+});
+if (closedTooltip) return; // Prevent other Esc actions if tooltip was closed
 
-        if (index < 0 || index >= files.length) {
-            currentFileIndex = -1;
-            editor.setValue(""); editor.clearHistory();
-            editor.setOption("mode", "text/plain"); updateUIForFileStatus(); return;
-        }
-        if (index === currentFileIndex) return; // Already active
-        currentFileIndex = index; const file = files[currentFileIndex];
-        // Use operation to ensure setValue and mode change are atomic if needed
-        editor.operation(() => {
-            editor.setValue(file.content);
-            editor.setOption("mode", file.language);
-        });
-        editor.clearHistory(); // Clear history after setting content
-        editor.focus();
-        updateUIForFileStatus(); // Update UI after everything is set
-    }
+return CodeMirror.Pass;
+},
+"Alt-\\": function(cm) {
+triggerAICompletion();
+},
+"Tab": function(cm) {
+if (activeSuggestionMarker) {
+clearActiveSuggestion(true); return;
+}
+return CodeMirror.Pass;
+}
+}
+});
 
-    function openFileByIndex(index) { setActiveFile(index); }
-    function createNewFile(name, language) {
-        if (!name) { alert("File name cannot be empty."); return false; } if (files.some(f => f.name === name)) { alert(`A file named "${name}" already exists.`); return false; }
-        const newFile = { name: name, content: "", language: language, unsaved: true, handle: null }; files.push(newFile);
-        // <<< Clear suggestion before activating new file >>>
-        clearActiveSuggestion(false);
-        setActiveFile(files.length - 1); return true;
-    }
-    function removeFile(index) {
-        if (index < 0 || index >= files.length) return; const fileToRemove = files[index]; if (fileToRemove.unsaved) { if (!confirm(`Discard unsaved changes in "${fileToRemove.name}"?`)) return; }
-        files.splice(index, 1); let nextIndex = -1; if (files.length === 0) nextIndex = -1; else if (currentFileIndex === index) nextIndex = Math.max(0, index - 1); else if (currentFileIndex > index) nextIndex = currentFileIndex - 1; else nextIndex = currentFileIndex;
-        // <<< Clear suggestion before activating next file >>>
-        clearActiveSuggestion(false);
-        setActiveFile(nextIndex);
-    }
+editor.on("cursorActivity", handleCursorActivity);
+editor.on("change", handleEditorChange);
 
+applyBodyThemeStyles(themes[currentThemeIndex]);
+updateUIForFileStatus();
+}
 
-    // --- File Saving/Loading ---
-    function getMimeType(language) { switch (language) { case "javascript": return "text/javascript"; case "htmlmixed": return "text/html"; case "css": return "text/css"; case "xml": return "text/xml"; default: return "text/plain"; } }
-    function getSuggestedExtension(language) { switch (language) { case "javascript": return ".js"; case "htmlmixed": return ".html"; case "css": return ".css"; case "xml": return ".xml"; default: return ".txt"; } }
-    function getLanguageFromFileName(name) { const extension = name.split('.').pop().toLowerCase(); switch (extension) { case "js": return "javascript"; case "html": case "htm": return "htmlmixed"; case "css": return "css"; case "xml": case "svg": return "xml"; case "json": return "javascript"; case "md": return "text/plain"; default: return "text/plain"; } }
-    function getFilePickerTypes() { return [ { description: 'JavaScript', accept: { 'text/javascript': ['.js'] } }, { description: 'HTML', accept: { 'text/html': ['.html', '.htm'] } }, { description: 'CSS', accept: { 'text/css': ['.css'] } }, { description: 'XML', accept: { 'text/xml': ['.xml', '.svg'] } }, { description: 'Text Files', accept: { 'text/plain': ['.txt'] } }, { description: 'All Files', accept: {'*/*': []} } ]; }
-    async function saveFile(isSaveAs = false) {
-        clearActiveSuggestion(false); // Clear suggestion before saving
-        if (currentFileIndex < 0 || !files[currentFileIndex]) { console.error("Save attempt failed: No active file."); return; }
-        const file = files[currentFileIndex]; file.content = editor.getValue(); let handle = file.handle;
-        const suggestedName = isSaveAs ? saveAsFileNameInput.value.trim() : file.name; if (!suggestedName) { alert("Please enter a file name."); if(isSaveAs) saveAsFileNameInput.focus(); return; }
-        if (window.showSaveFilePicker) {
-            try {
-                if (isSaveAs || !handle) {
-                    handle = await window.showSaveFilePicker({ suggestedName: suggestedName, types: getFilePickerTypes() }); file.handle = handle;
-                    if (isSaveAs || file.name !== handle.name) { file.name = handle.name; const newLang = getLanguageFromFileName(file.name); if (newLang !== file.language) { file.language = newLang; editor.setOption("mode", newLang); } }
-                }
-                const writable = await handle.createWritable(); await writable.write(file.content); await writable.close();
-                file.unsaved = false; console.log(`File "${handle.name}" saved via FSA API.`); setStatusMessage(`Saved ${handle.name}`); updateUIForFileStatus();
-            } catch (err) {
-                if (err.name === 'AbortError') { console.log("Save cancelled."); setStatusMessage("Save cancelled"); return; }
-                console.error("Error saving with FSA API:", err); setStatusMessage(`Save failed: ${err.message}`, true);
-                if (!isSaveAs) { console.log("Falling back to download method."); setStatusMessage("FSA API failed, falling back to download...", true); triggerDownload(file.name, file.content, file.language); file.unsaved = false; updateUIForFileStatus(); }
-            }
-        } else {
-            console.log("FSA API not supported. Using download."); if (isSaveAs) { file.name = suggestedName; file.language = getLanguageFromFileName(suggestedName); editor.setOption("mode", file.language); }
-            triggerDownload(file.name, file.content, file.language); file.unsaved = false; setStatusMessage(`Downloaded ${file.name}`); updateUIForFileStatus();
-        }
-    }
-    function triggerDownload(filename, content, language) { const blob = new Blob([content], { type: getMimeType(language) }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); console.log(`Download initiated: "${filename}".`); }
-    function handleSaveClick() { saveFile(false); }
-    function handleSaveAsConfirm() { saveFile(true); closeModal(saveAsModal); }
+// --- UI Update Functions ---
+function handleCursorActivity() {
+const cursor = editor.getCursor();
+cursorPositionEl.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
 
-    // <<< MODIFICATION: Fixed openFile function >>>
-    async function openFile() {
-        console.log("openFile started"); // Keep for debugging
+if (activeSuggestionMarker) {
+const markerRange = activeSuggestionMarker.find();
+if (markerRange) {
+const currentCursor = editor.getCursor();
+if (CodeMirror.cmpPos(currentCursor, markerRange.from) < 0 ||
+CodeMirror.cmpPos(currentCursor, markerRange.to) > 0) {
+clearActiveSuggestion(false);
+}
+} else {
+clearActiveSuggestion(false);
+}
+}
+}
 
-        if (window.showOpenFilePicker) {
-            console.log("Using showOpenFilePicker");
-            try {
-                // Clear suggestion *before* showing the picker
-                clearActiveSuggestion(false);
+function handleEditorChange(cm, change) {
+if (isInsertingAISuggestion) {
+console.log("Ignoring change event during AI suggestion insertion.");
+return;
+}
+if (activeSuggestionMarker) {
+console.log("Clearing suggestion due to user change (origin:", change.origin, ")");
+clearActiveSuggestion(false);
+}
+if (currentFileIndex >= 0 && files[currentFileIndex] && !files[currentFileIndex].unsaved) {
+// Only mark unsaved if it's not a linting-related change or AI rejection
+if (change.origin !== 'setValue' && change.origin !== 'paste' && change.origin !== '+delete' && change.origin !== '*lint*' && !(change.origin === 'undo' && !editor.historySize().undo)) {
+// Avoid marking unsaved just by rejecting suggestion or initial load/setValue
+if (!change.removed || !activeSuggestionMarker || change.text.join('') !== '') {
+files[currentFileIndex].unsaved = true;
+updateFileList();
+updateFileInfo();
+updateSaveButtonState();
+}
+}
+}
+}
 
-                const [handle] = await window.showOpenFilePicker({ types: getFilePickerTypes(), multiple: false });
-                console.log("File handle obtained:", handle.name);
-
-                // Check if already open via handle
-                const existingIndex = files.findIndex(f => f.handle && f.handle.isSameEntry && f.handle.isSameEntry(handle));
-                if (existingIndex !== -1) {
-                    console.log(`Switching to already open file: "${handle.name}"`);
-                    setStatusMessage(`Switched to ${handle.name}`);
-                    // setActiveFile already clears suggestions if needed
-                    setActiveFile(existingIndex);
-                    return;
-                }
-                // Check if already open by name (fallback)
-                const existingNameIndex = files.findIndex(f => f.name === handle.name);
-                 if (existingNameIndex !== -1) {
-                    if (confirm(`"${handle.name}" is already open (without a file handle). Reload it? (Unsaved changes will be lost)`)) {
-                        const fileData = await handle.getFile(); const content = await fileData.text();
-                        files[existingNameIndex].content = content; files[existingNameIndex].unsaved = false;
-                        files[existingNameIndex].handle = handle;
-                        files[existingNameIndex].language = getLanguageFromFileName(fileData.name); // Update language too
-                        // Clear suggestion right before activating/updating
-                        clearActiveSuggestion(false);
-                        if (currentFileIndex === existingNameIndex) setActiveFile(existingNameIndex);
-                        else updateFileList();
-                        console.log(`Reloaded "${handle.name}" from disk.`);
-                        setStatusMessage(`Reloaded ${handle.name}`);
-                        return;
-                    } else {
-                        console.log(`Did not reload "${handle.name}". Keeping existing tab.`);
-                         // Clear suggestion right before activating
-                        clearActiveSuggestion(false);
-                        setActiveFile(existingNameIndex);
-                        return;
-                    }
-                }
-                // Open as new file
-                const fileData = await handle.getFile(); const content = await fileData.text();
-                const language = getLanguageFromFileName(fileData.name);
-                const newFile = { name: fileData.name, content: content, language: language, unsaved: false, handle: handle };
-                files.push(newFile);
-                // Clear suggestion right before activating
-                clearActiveSuggestion(false);
-                setActiveFile(files.length - 1);
-                console.log(`Opened "${handle.name}" via FSA API.`);
-                setStatusMessage(`Opened ${handle.name}`);
-            } catch (err) {
-                console.error("Error within showOpenFilePicker try block:", err);
-                if (err.name === 'AbortError') { console.log("Open cancelled by user."); setStatusMessage("Open cancelled"); }
-                else { console.error("Error opening with FSA API:", err); setStatusMessage(`Open failed: ${err.message}`, true); }
-            }
-        } else {
-            console.log("FSA API not supported. Using <input type='file'>.");
-            triggerLegacyFileOpen(); // Call the legacy method
-        }
-         console.log("openFile finished"); // Keep for debugging
-    }
-
-    // <<< MODIFICATION: Fixed triggerLegacyFileOpen function >>>
-    function triggerLegacyFileOpen() {
-        console.log("triggerLegacyFileOpen started");
-        // Clear suggestion right before creating the input
-        clearActiveSuggestion(false);
-
-        const input = document.createElement("input"); input.type = "file";
-        const acceptString = getFilePickerTypes().flatMap(type => Object.values(type.accept).flat()).filter(ext => ext).join(',') || ".txt,.js,.html,.css,.xml";
-        input.accept = acceptString;
-
-        input.onchange = function(e) {
-          if (e.target.files && e.target.files.length > 0) {
-            const file = e.target.files[0];
-            console.log("Legacy input changed, file selected:", file.name);
-
-            const existingIndex = files.findIndex(f => f.name === file.name);
-            if (existingIndex !== -1) {
-                 if (confirm(`"${file.name}" is already open. Reload it? (Unsaved changes will be lost)`)) {
-                     const reader = new FileReader();
-                     reader.onload = (ev) => {
-                         files[existingIndex].content = ev.target.result; files[existingIndex].unsaved = false;
-                         files[existingIndex].language = getLanguageFromFileName(file.name);
-                         // Clear suggestion right before activating/updating
-                         clearActiveSuggestion(false);
-                         if (currentFileIndex === existingIndex) setActiveFile(existingIndex);
-                         else updateFileList();
-                         console.log(`Reloaded "${file.name}" (legacy).`); setStatusMessage(`Reloaded ${file.name}`);
-                     }; reader.readAsText(file);
-                 } else {
-                     console.log(`Did not reload "${file.name}".`); setStatusMessage(`Kept existing ${file.name}`);
-                     // Clear suggestion right before activating
-                     clearActiveSuggestion(false);
-                     setActiveFile(existingIndex);
-                 } return;
-            }
-            // Open as new file (legacy)
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-              const content = ev.target.result; const language = getLanguageFromFileName(file.name);
-              const newFile = { name: file.name, content: content, language: language, unsaved: false, handle: null };
-              files.push(newFile);
-              // Clear suggestion right before activating
-              clearActiveSuggestion(false);
-              setActiveFile(files.length - 1);
-              console.log(`Opened "${file.name}" (legacy).`); setStatusMessage(`Opened ${file.name}`);
-            }; reader.onerror = (err) => { console.error("FileReader error:", err); setStatusMessage(`Error reading ${file.name}`, true); alert(`Error reading file: ${file.name}`); }
-            reader.readAsText(file);
-          } else {
-              console.log("Legacy input change event fired, but no file selected.");
-          }
-        };
-        input.click(); // Trigger the input click
-        console.log("Legacy input clicked.");
-    }
+function updateFileList() {
+fileListEl.innerHTML = "";
+if (files.length === 0) {
+const li = document.createElement("li"); li.textContent = "No files open"; li.style.padding = "8px"; li.style.color = "#a0a8b0"; li.style.fontSize = "0.85rem"; fileListEl.appendChild(li); return;
+}
+files.forEach((file, index) => {
+const li = document.createElement("li"); li.className = `file-item ${index === currentFileIndex ? "active" : ""}`; li.title = file.name; li.dataset.index = index; li.onclick = () => openFileByIndex(index);
+const nameSpan = document.createElement("span"); nameSpan.className = "file-name"; nameSpan.textContent = file.name;
+if (file.unsaved) {
+const unsavedIndicator = document.createElement("span"); unsavedIndicator.className = "unsaved-indicator"; unsavedIndicator.textContent = "*"; unsavedIndicator.title = "Unsaved changes"; nameSpan.appendChild(unsavedIndicator);
+}
+const removeBtn = document.createElement("button"); removeBtn.className = "file-remove"; removeBtn.innerHTML = "&times;"; removeBtn.title = `Close ${file.name}`; removeBtn.dataset.index = index; removeBtn.onclick = (e) => { e.stopPropagation(); removeFile(index); };
+li.appendChild(nameSpan); li.appendChild(removeBtn); fileListEl.appendChild(li);
+});
+}
+function updateFileInfo() {
+if (currentFileIndex >= 0 && files[currentFileIndex]) {
+const file = files[currentFileIndex]; fileInfoEl.textContent = `${file.name}${file.unsaved ? " (unsaved)" : ""}`; languageSelectEl.value = file.language;
+} else {
+fileInfoEl.textContent = "No file opened"; languageSelectEl.value = "text/plain"; cursorPositionEl.textContent = `Ln 1, Col 1`;
+}
+}
+function updateSaveButtonState() {
+const canSave = currentFileIndex >= 0 && files[currentFileIndex] && files[currentFileIndex].unsaved; saveFileBtn.disabled = !canSave; saveAsBtn.disabled = !(currentFileIndex >= 0 && files[currentFileIndex]);
+}
+function updateLanguageDropdownState() {
+languageSelectEl.disabled = !(currentFileIndex >= 0 && files[currentFileIndex]);
+}
+function updateUIForFileStatus() {
+updateFileList(); updateFileInfo(); updateSaveButtonState(); updateLanguageDropdownState();
+}
+function setStatusMessage(message = "", isError = false) {
+statusMessageEl.textContent = message; statusMessageEl.style.color = isError ? "#ff5555" : "#ffb86c";
+}
 
 
-    // --- Find & Replace Logic ---
-    function toggleFindReplace(show) {
-        clearActiveSuggestion(false); // Clear suggestion when opening find/replace
-        findReplaceContainerEl.style.display = show ? "flex" : "none";
-        if (show) { const selection = editor.getSelection(); if (selection) findInputEl.value = selection; findInputEl.focus(); findInputEl.select(); lastSearch.cursor = null; lastSearch.query = null; }
-        else { editor.focus(); }
-    }
-    function find(reverse = false) { if (!editor) return; const query = findInputEl.value; if (!query) { setStatusMessage("Find: No query", true); return; } const caseSensitive = false; setStatusMessage(`Finding "${query}"...`); const searchCursor = editor.getSearchCursor(query, reverse ? editor.getCursor("from") : editor.getCursor("to"), { caseFold: !caseSensitive, reverse: reverse }); if (!searchCursor.find(reverse)) { const startPos = reverse ? CodeMirror.Pos(editor.lastLine()) : CodeMirror.Pos(0, 0); const wrapCursor = editor.getSearchCursor(query, startPos, { caseFold: !caseSensitive, reverse: reverse }); if (!wrapCursor.find(reverse)) { setStatusMessage(`"${query}" not found`); return; } editor.setSelection(wrapCursor.from(), wrapCursor.to()); setStatusMessage(`Found "${query}" (wrapped)`); } else { editor.setSelection(searchCursor.from(), searchCursor.to()); setStatusMessage(`Found "${query}"`); } editor.scrollIntoView({ from: editor.getCursor("from"), to: editor.getCursor("to") }, 50); }
-    function replace() { if (!editor) return; const query = findInputEl.value; const replacement = replaceInputEl.value; const selection = editor.getSelection(); const caseSensitive = false; const selectionMatches = selection && (caseSensitive ? selection === query : selection.toLowerCase() === query.toLowerCase()); if (selection && selectionMatches) { editor.replaceSelection(replacement, "around"); setStatusMessage(`Replaced "${query}"`); find(false); } else { find(false); } }
-    function replaceAll() { if (!editor) return; const query = findInputEl.value; const replacement = replaceInputEl.value; if (!query) { setStatusMessage("Replace All: No query", true); return; } const caseSensitive = false; let count = 0; editor.operation(() => { const cursor = editor.getSearchCursor(query, CodeMirror.Pos(0, 0), { caseFold: !caseSensitive }); while (cursor.findNext()) { cursor.replace(replacement); count++; } }); setStatusMessage(`Replaced ${count} instance(s) of "${query}"`); }
+// --- File Management Logic ---
+function setActiveFile(index) {
+console.log(`setActiveFile called with index: ${index}`);
+clearActiveSuggestion(false); // Clear suggestion when switching files
+
+if (index < 0 || index >= files.length) {
+currentFileIndex = -1;
+editor.setValue(""); editor.clearHistory();
+editor.setOption("mode", "text/plain"); updateUIForFileStatus();
+editor.setOption("lint", false); // Disable linting if no file
+return;
+}
+if (index === currentFileIndex) return; // Already active
+currentFileIndex = index; const file = files[currentFileIndex];
+// Use operation to ensure setValue and mode change are atomic
+editor.operation(() => {
+editor.setValue(file.content);
+editor.setOption("mode", file.language);
+// Enable/disable linting based on whether we have a linter for the mode
+const lintableModes = ['javascript', 'typescript', 'json', 'css', 'htmlmixed', 'yaml'];
+editor.setOption("lint", lintableModes.includes(file.language));
+});
+editor.clearHistory(); // Clear history after setting content
+editor.focus();
+updateUIForFileStatus(); // Update UI after everything is set
+}
+
+function openFileByIndex(index) { setActiveFile(index); }
+function createNewFile(name, language) {
+if (!name) { alert("File name cannot be empty."); return false; } if (files.some(f => f.name === name)) { alert(`A file named "${name}" already exists.`); return false; }
+const newFile = { name: name, content: "", language: language, unsaved: true, handle: null }; files.push(newFile);
+clearActiveSuggestion(false);
+setActiveFile(files.length - 1); return true;
+}
+function removeFile(index) {
+if (index < 0 || index >= files.length) return; const fileToRemove = files[index]; if (fileToRemove.unsaved) { if (!confirm(`Discard unsaved changes in "${fileToRemove.name}"?`)) return; }
+files.splice(index, 1); let nextIndex = -1; if (files.length === 0) nextIndex = -1; else if (currentFileIndex === index) nextIndex = Math.max(0, index - 1); else if (currentFileIndex > index) nextIndex = currentFileIndex - 1; else nextIndex = currentFileIndex;
+clearActiveSuggestion(false);
+setActiveFile(nextIndex);
+}
 
 
-    // --- Theme Management ---
-    function applyBodyThemeStyles(themeName) { const type = themeTypes[themeName] || 'dark'; if (type === 'light') { document.body.style.backgroundColor = "#ffffff"; document.body.style.color = "#333333"; } else { document.body.style.backgroundColor = "#282a36"; document.body.style.color = "#f8f8f2"; } }
-    function cycleTheme() { currentThemeIndex = (currentThemeIndex + 1) % themes.length; const newTheme = themes[currentThemeIndex]; editor.setOption("theme", newTheme); applyBodyThemeStyles(newTheme); console.log(`Theme: ${newTheme}`); document.getElementById('themeToggle').title = `Current Theme: ${newTheme}`; setStatusMessage(`Theme set to ${newTheme}`); }
+// --- File Saving/Loading Helpers (Updated) ---
+function getMimeType(language) {
+// Map CodeMirror mode to a plausible MIME type for saving/Blobs
+switch (language) {
+case "javascript": return "text/javascript";
+case "typescript": return "text/typescript";
+case "htmlmixed": return "text/html";
+case "css": return "text/css";
+case "xml": return "application/xml"; // Or text/xml
+case "python": return "text/x-python";
+case "java": return "text/x-java-source";
+case "text/x-c++src": return "text/x-c++src";
+case "text/x-csharp": return "text/x-csharp";
+case "php": return "application/x-httpd-php"; // Common, though text/php also used
+case "ruby": return "text/x-ruby";
+case "go": return "text/x-go";
+case "swift": return "text/x-swift";
+case "rust": return "text/rust";
+case "kotlin": return "text/x-kotlin";
+case "scala": return "text/x-scala";
+case "sql": return "application/sql";
+case "shell": return "application/x-sh";
+case "perl": return "text/x-perl";
+case "r": return "text/x-r-source";
+case "lua": return "text/x-lua";
+case "markdown": return "text/markdown";
+case "yaml": return "application/x-yaml"; // Or text/yaml
+case "json": return "application/json";
+case "text/plain":
+default: return "text/plain";
+}
+}
+
+function getSuggestedExtension(language) {
+// Map CodeMirror mode to a common file extension
+switch (language) {
+case "javascript": return ".js";
+case "typescript": return ".ts";
+case "htmlmixed": return ".html";
+case "css": return ".css";
+case "xml": return ".xml";
+case "python": return ".py";
+case "java": return ".java";
+case "text/x-c++src": return ".cpp";
+case "text/x-csharp": return ".cs";
+case "php": return ".php";
+case "ruby": return ".rb";
+case "go": return ".go";
+case "swift": return ".swift";
+case "rust": return ".rs";
+case "kotlin": return ".kt";
+case "scala": return ".scala";
+case "sql": return ".sql";
+case "shell": return ".sh";
+case "perl": return ".pl";
+case "r": return ".r";
+case "lua": return ".lua";
+case "markdown": return ".md";
+case "yaml": return ".yaml";
+case "json": return ".json";
+case "text/plain":
+default: return ".txt";
+}
+}
+
+function getLanguageFromFileName(name) {
+if (!name || name.indexOf('.') === -1) return "text/plain"; // Default if no extension
+const extension = name.split('.').pop().toLowerCase();
+switch (extension) {
+case "js": case "mjs": case "cjs": return "javascript";
+case "ts": case "tsx": return "typescript"; // TSX might need JSX mode enabled too
+case "html": case "htm": return "htmlmixed";
+case "css": return "css";
+case "xml": case "svg": case "rss": case "atom": return "xml";
+case "py": case "pyw": return "python";
+case "java": return "java"; // Uses clike base
+case "c": case "h": return "text/x-csrc"; // Specific C mode via clike
+case "cpp": case "cxx": case "hpp": case "hxx": return "text/x-c++src"; // Specific C++ mode via clike
+case "cs": return "text/x-csharp"; // Specific C# mode via clike
+case "php": case "php3": case "php4": case "php5": case "phtml": return "php";
+case "rb": return "ruby";
+case "go": return "go";
+case "swift": return "swift";
+case "rs": return "rust";
+case "kt": case "kts": return "kotlin"; // Specific Kotlin mode via clike
+case "scala": return "scala"; // Specific Scala mode via clike
+case "sql": return "sql";
+case "sh": case "bash": case "zsh": return "shell";
+case "pl": case "pm": return "perl";
+case "r": return "r";
+case "lua": return "lua";
+case "md": case "markdown": return "markdown";
+case "yaml": case "yml": return "yaml";
+case "json": return "application/json"; // Use json mode, which is often JS alias
+case "txt":
+default: return "text/plain";
+}
+}
+
+function getFilePickerTypes() {
+// Define types for File System Access API pickers
+return [
+{ description: 'JavaScript', accept: { 'text/javascript': ['.js', '.mjs', '.cjs'] } },
+{ description: 'TypeScript', accept: { 'text/typescript': ['.ts', '.tsx'] } },
+{ description: 'HTML', accept: { 'text/html': ['.html', '.htm'] } },
+{ description: 'CSS', accept: { 'text/css': ['.css'] } },
+{ description: 'Python', accept: { 'text/x-python': ['.py', '.pyw'] } },
+{ description: 'Java', accept: { 'text/x-java-source': ['.java'] } },
+{ description: 'C++', accept: { 'text/x-c++src': ['.cpp', '.cxx', '.hpp', '.hxx'] } },
+{ description: 'C#', accept: { 'text/x-csharp': ['.cs'] } },
+{ description: 'PHP', accept: { 'application/x-httpd-php': ['.php', '.phtml'] } },
+{ description: 'Ruby', accept: { 'text/x-ruby': ['.rb'] } },
+{ description: 'Go', accept: { 'text/x-go': ['.go'] } },
+{ description: 'Swift', accept: { 'text/x-swift': ['.swift'] } },
+{ description: 'Rust', accept: { 'text/rust': ['.rs'] } },
+{ description: 'Kotlin', accept: { 'text/x-kotlin': ['.kt', '.kts'] } },
+{ description: 'Scala', accept: { 'text/x-scala': ['.scala'] } },
+{ description: 'SQL', accept: { 'application/sql': ['.sql'] } },
+{ description: 'Shell Script', accept: { 'application/x-sh': ['.sh', '.bash', '.zsh'] } },
+{ description: 'Perl', accept: { 'text/x-perl': ['.pl', '.pm'] } },
+{ description: 'R Script', accept: { 'text/x-r-source': ['.r'] } },
+{ description: 'Lua', accept: { 'text/x-lua': ['.lua'] } },
+{ description: 'Markdown', accept: { 'text/markdown': ['.md', '.markdown'] } },
+{ description: 'YAML', accept: { 'application/x-yaml': ['.yaml', '.yml'] } },
+{ description: 'XML', accept: { 'application/xml': ['.xml', '.svg', '.rss', '.atom'] } },
+{ description: 'JSON', accept: { 'application/json': ['.json'] } },
+{ description: 'Text Files', accept: { 'text/plain': ['.txt'] } },
+{ description: 'All Files', accept: {'*/*': []} }
+];
+}
+
+// --- File Saving/Loading (Core Logic - Relies on updated helpers) ---
+async function saveFile(isSaveAs = false) {
+clearActiveSuggestion(false);
+if (currentFileIndex < 0 || !files[currentFileIndex]) { console.error("Save attempt failed: No active file."); return; }
+const file = files[currentFileIndex]; file.content = editor.getValue(); let handle = file.handle;
+
+// Determine the suggested name and ensure it's valid
+let suggestedName = file.name;
+if (isSaveAs) {
+suggestedName = saveAsFileNameInput.value.trim();
+if (!suggestedName) {
+alert("Please enter a file name.");
+saveAsFileNameInput.focus();
+return;
+}
+// If name changed, re-evaluate language based on new extension
+const newLang = getLanguageFromFileName(suggestedName);
+if (newLang !== file.language) {
+file.language = newLang;
+editor.setOption("mode", newLang); // Update editor mode immediately
+// Re-evaluate linting for the new language
+const lintableModes = ['javascript', 'typescript', 'json', 'css', 'htmlmixed', 'yaml'];
+editor.setOption("lint", lintableModes.includes(file.language));
+}
+} else if (!file.name){
+// This case shouldn't happen if created via modal, but safety check
+alert("Cannot save file without a name. Use 'Save As'.");
+return;
+}
 
 
-    // --- Modal Handling ---
-    function openModal(modalElement) {
-        clearActiveSuggestion(false); // Clear suggestion when opening modal
-        modalElement.style.display = "block"; const firstInput = modalElement.querySelector('input[type="text"], select'); if (firstInput) { setTimeout(() => firstInput.focus(), 50); if (firstInput.select) firstInput.select(); }
-    }
-    function closeModal(modalElement) { modalElement.style.display = "none"; editor.focus(); }
-    window.addEventListener('click', (event) => { if (event.target.classList.contains('modal')) closeModal(event.target); });
+if (window.showSaveFilePicker) {
+try {
+const pickerOptions = {
+suggestedName: suggestedName,
+types: getFilePickerTypes() // Use updated types
+};
+if (isSaveAs || !handle) {
+handle = await window.showSaveFilePicker(pickerOptions);
+file.handle = handle; // Store the new handle
+
+// Update file name and potentially language if the user changed it in the picker
+if (file.name !== handle.name) {
+file.name = handle.name;
+const pickedLang = getLanguageFromFileName(handle.name);
+if (pickedLang !== file.language) {
+file.language = pickedLang;
+editor.setOption("mode", pickedLang);
+// Re-evaluate linting
+const lintableModes = ['javascript', 'typescript', 'json', 'css', 'htmlmixed', 'yaml'];
+editor.setOption("lint", lintableModes.includes(file.language));
+}
+}
+}
+const writable = await handle.createWritable(); await writable.write(file.content); await writable.close();
+file.unsaved = false; console.log(`File "${handle.name}" saved via FSA API.`); setStatusMessage(`Saved ${handle.name}`); updateUIForFileStatus();
+} catch (err) {
+if (err.name === 'AbortError') { console.log("Save cancelled."); setStatusMessage("Save cancelled"); return; }
+console.error("Error saving with FSA API:", err); setStatusMessage(`Save failed: ${err.message}`, true);
+// Fallback only if it wasn't an explicit Save As cancellation
+if (!isSaveAs || err.name !== 'AbortError') {
+console.log("Falling back to download method."); setStatusMessage("FSA API failed, falling back to download...", true);
+triggerDownload(suggestedName, file.content, file.language); // Use suggestedName for download
+file.name = suggestedName; // Ensure file object name matches downloaded name
+file.unsaved = false; updateUIForFileStatus();
+}
+}
+} else {
+console.log("FSA API not supported. Using download.");
+// Ensure file name and language match the intended save name if Save As
+if (isSaveAs) {
+file.name = suggestedName;
+// Language already updated above if needed
+}
+triggerDownload(file.name, file.content, file.language);
+file.unsaved = false; setStatusMessage(`Downloaded ${file.name}`); updateUIForFileStatus();
+}
+}
+
+function triggerDownload(filename, content, language) { const blob = new Blob([content], { type: getMimeType(language) }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); console.log(`Download initiated: "${filename}".`); }
+function handleSaveClick() { saveFile(false); }
+function handleSaveAsConfirm() { saveFile(true); closeModal(saveAsModal); }
+
+async function openFile() {
+console.log("openFile started");
+if (window.showOpenFilePicker) {
+console.log("Using showOpenFilePicker");
+try {
+clearActiveSuggestion(false);
+const [handle] = await window.showOpenFilePicker({ types: getFilePickerTypes(), multiple: false }); // Use updated types
+console.log("File handle obtained:", handle.name);
+const existingIndex = files.findIndex(f => f.handle && typeof f.handle.isSameEntry === 'function' && f.handle.isSameEntry(handle));
+if (existingIndex !== -1) {
+console.log(`Switching to already open file: "${handle.name}"`); setStatusMessage(`Switched to ${handle.name}`); setActiveFile(existingIndex); return;
+}
+const existingNameIndex = files.findIndex(f => f.name === handle.name);
+if (existingNameIndex !== -1) {
+if (confirm(`"${handle.name}" is already open (potentially without handle). Reload it? (Unsaved changes will be lost)`)) {
+const fileData = await handle.getFile(); const content = await fileData.text();
+files[existingNameIndex].content = content; files[existingNameIndex].unsaved = false; files[existingNameIndex].handle = handle; files[existingNameIndex].language = getLanguageFromFileName(fileData.name);
+clearActiveSuggestion(false);
+if (currentFileIndex === existingNameIndex) setActiveFile(existingNameIndex); // Reload content and mode
+else { setActiveFile(existingNameIndex); } // Just switch
+console.log(`Reloaded "${handle.name}" from disk.`); setStatusMessage(`Reloaded ${handle.name}`); return;
+} else {
+console.log(`Did not reload "${handle.name}". Keeping existing tab.`);
+setActiveFile(existingNameIndex); // Just switch
+return;
+}
+}
+const fileData = await handle.getFile(); const content = await fileData.text();
+const language = getLanguageFromFileName(fileData.name); // Use updated detection
+const newFile = { name: fileData.name, content: content, language: language, unsaved: false, handle: handle };
+files.push(newFile);
+clearActiveSuggestion(false);
+setActiveFile(files.length - 1);
+console.log(`Opened "${handle.name}" via FSA API.`); setStatusMessage(`Opened ${handle.name}`);
+} catch (err) {
+if (err.name === 'AbortError') { console.log("Open cancelled by user."); setStatusMessage("Open cancelled"); }
+else { console.error("Error opening with FSA API:", err); setStatusMessage(`Open failed: ${err.message}`, true); }
+}
+} else {
+console.log("FSA API not supported. Using <input type='file'>.");
+triggerLegacyFileOpen();
+}
+console.log("openFile finished");
+}
+
+function triggerLegacyFileOpen() {
+console.log("triggerLegacyFileOpen started");
+clearActiveSuggestion(false);
+
+const input = document.createElement("input"); input.type = "file";
+// Generate accept string from *all* extensions in getFilePickerTypes
+const allExtensions = getFilePickerTypes()
+.flatMap(type => Object.values(type.accept || {}).flat())
+.filter((ext, index, self) => ext && self.indexOf(ext) === index); // Unique, non-empty extensions
+input.accept = allExtensions.join(',') || "*/*"; // Fallback if empty
+console.log("Legacy input accept:", input.accept);
 
 
-    // --- AI Suggestion Management ---
-    function clearActiveSuggestion(accepted = false) {
-        if (activeSuggestionMarker) {
-            const marker = activeSuggestionMarker; const markerId = marker.id; activeSuggestionMarker = null;
-            console.log(`Clearing suggestion marker ${markerId}. Accepted: ${accepted}`);
-            if (accepted) {
-                marker.clear(); const range = marker.find(); if (range) { editor.setCursor(range.to); } setStatusMessage("Suggestion accepted");
-            } else {
-                const range = marker.find();
-                if (range) { editor.operation(() => { editor.replaceRange("", range.from, range.to); }); console.log(`Suggestion marker ${markerId} rejected and removed.`); setStatusMessage("Suggestion dismissed");
-                } else { marker.clear(); console.log(`Suggestion marker ${markerId} rejected (marker cleared, range not found).`); setStatusMessage("Suggestion dismissed"); }
-            }
-             setTimeout(() => { if (statusMessageEl.textContent === "Suggestion accepted" || statusMessageEl.textContent === "Suggestion dismissed") { setStatusMessage(""); } }, 2000);
-        }
-    }
+input.onchange = function(e) {
+if (e.target.files && e.target.files.length > 0) {
+const file = e.target.files[0];
+console.log("Legacy input changed, file selected:", file.name);
 
-    // --- AI Completion ---
-    async function triggerAICompletion() {
-        if (!editor || isAICompleting || currentFileIndex < 0) { if (isAICompleting) setStatusMessage("AI is already working...", true); else setStatusMessage("AI Completion not available", true); return; }
-        clearActiveSuggestion(false); isAICompleting = true; setStatusMessage("AI thinking...");
-        try {
-            const cursor = editor.getCursor(); const textBeforeCursor = editor.getRange(CodeMirror.Pos(0, 0), cursor); const promptText = textBeforeCursor.slice(-AI_PROMPT_MAX_CHARS);
-            console.log("--- Sending Prompt to AI ---"); console.log(promptText);
-            const completion = await fetchAICompletion(promptText);
-            console.log("--- Raw Completion Received ---"); console.log(JSON.stringify(completion));
-            if (completion && completion.trim() !== "") {
-                const from = cursor; isInsertingAISuggestion = true; let marker;
-                editor.operation(() => {
-                    editor.replaceRange(completion, from, from, "+AICompletion"); const to = editor.getCursor(); marker = editor.markText(from, to, { className: 'cm-ai-suggestion' }); activeSuggestionMarker = marker;
-                    marker.on('clear', () => { if (activeSuggestionMarker && activeSuggestionMarker.id === marker.id) { console.log(`Suggestion marker ${marker.id} cleared externally or by accept/reject.`); activeSuggestionMarker = null; } });
-                });
-                setStatusMessage("AI Suggestion: Tab=Accept, Esc=Dismiss"); console.log("AI Suggestion displayed:", completion);
-            } else { console.warn("Completion was empty or null after processing."); setStatusMessage("AI returned no useful completion"); }
-        } catch (error) { console.error("AI Completion Error:", error); setStatusMessage(`AI Error: ${error.message}`, true); clearActiveSuggestion(false);
-        } finally { isAICompleting = false; isInsertingAISuggestion = false; if (statusMessageEl.textContent === "AI thinking...") { setStatusMessage(""); } }
-    }
-
-    async function fetchAICompletion(prompt) {
-        try {
-             const requestBody = { prompt: prompt, n_predict: AI_COMPLETION_MAX_TOKENS, temperature: 0.7, stop: AI_COMPLETION_STOP_TOKENS };
-             console.log("--- Sending Request Body ---"); console.log(JSON.stringify(requestBody, null, 2));
-             const response = await fetch(LLAMA_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify(requestBody) });
-             if (!response.ok) { throw new Error(`API request failed: ${response.status} ${response.statusText} - ${await response.text()}`); }
-             const data = await response.json();
-             console.log("--- Raw Response Data from Server ---"); console.log(JSON.stringify(data, null, 2));
-             if (data && data.content) { return data.content.replace(/^\s+/, ""); }
-             else { console.warn("AI response format unexpected or 'content' field missing/empty in raw data:", data); return null; }
-        } catch (error) { console.error("Fetch AI Completion failed:", error); throw new Error(`Could not reach AI server or parse response: ${error.message}`); }
-    }
+const existingIndex = files.findIndex(f => f.name === file.name);
+if (existingIndex !== -1) {
+if (confirm(`"${file.name}" is already open. Reload it? (Unsaved changes will be lost)`)) {
+const reader = new FileReader();
+reader.onload = (ev) => {
+files[existingIndex].content = ev.target.result; files[existingIndex].unsaved = false;
+files[existingIndex].language = getLanguageFromFileName(file.name); // Use updated detection
+files[existingIndex].handle = null; // Reset handle for legacy loaded files
+clearActiveSuggestion(false);
+if (currentFileIndex === existingIndex) setActiveFile(existingIndex); // Reload
+else { setActiveFile(existingIndex); } // Switch
+console.log(`Reloaded "${file.name}" (legacy).`); setStatusMessage(`Reloaded ${file.name}`);
+}; reader.onerror = (err) => { console.error("FileReader error:", err); setStatusMessage(`Error reading ${file.name}`, true); };
+reader.readAsText(file);
+} else {
+console.log(`Did not reload "${file.name}".`); setStatusMessage(`Kept existing ${file.name}`);
+setActiveFile(existingIndex); // Switch
+} return;
+}
+// Open as new file (legacy)
+const reader = new FileReader();
+reader.onload = function(ev) {
+const content = ev.target.result; const language = getLanguageFromFileName(file.name); // Use updated detection
+const newFile = { name: file.name, content: content, language: language, unsaved: false, handle: null }; // No handle for legacy
+files.push(newFile);
+clearActiveSuggestion(false);
+setActiveFile(files.length - 1);
+console.log(`Opened "${file.name}" (legacy).`); setStatusMessage(`Opened ${file.name}`);
+}; reader.onerror = (err) => { console.error("FileReader error:", err); setStatusMessage(`Error reading ${file.name}`, true); alert(`Error reading file: ${file.name}`); }
+reader.readAsText(file);
+} else {
+console.log("Legacy input change event fired, but no file selected.");
+}
+};
+input.click();
+console.log("Legacy input clicked.");
+}
 
 
-    // --- Event Listener Setup ---
-    function setupEventListeners() {
-      // Toolbar Buttons
-      document.getElementById("newFileBtn").addEventListener("click", () => { newFileNameInput.value = ""; openModal(newFileModal); });
-      document.getElementById("openFileBtn").addEventListener("click", openFile); // Event listener points to the fixed function
-      saveFileBtn.addEventListener("click", handleSaveClick);
-      saveAsBtn.addEventListener("click", () => { if (currentFileIndex >= 0 && files[currentFileIndex]) saveAsFileNameInput.value = files[currentFileIndex].name; else saveAsFileNameInput.value = ""; openModal(saveAsModal); });
-      document.getElementById("findReplaceBtn").addEventListener("click", () => toggleFindReplace(true));
-      document.getElementById("themeToggle").addEventListener("click", cycleTheme);
-      document.getElementById('themeToggle').title = `Current Theme: ${themes[currentThemeIndex]}`;
-
-      // Language Select Change
-      languageSelectEl.addEventListener("change", function() { if (currentFileIndex >= 0 && files[currentFileIndex]) { clearActiveSuggestion(false); const newLang = this.value; files[currentFileIndex].language = newLang; editor.setOption("mode", newLang); setStatusMessage(`Language set to ${this.options[this.selectedIndex].text}`); files[currentFileIndex].unsaved = true; updateUIForFileStatus(); } });
-
-      // Find/Replace Buttons & Inputs
-      document.getElementById("findPrevBtn").addEventListener("click", () => find(true)); document.getElementById("findNextBtn").addEventListener("click", () => find(false)); document.getElementById("replaceBtn").addEventListener("click", replace); document.getElementById("replaceAllBtn").addEventListener("click", replaceAll); document.getElementById("closeFindBtn").addEventListener("click", () => toggleFindReplace(false));
-      findInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); find(e.shiftKey); } else if (e.key === 'Escape') { toggleFindReplace(false); } });
-      replaceInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); replace(); } else if (e.key === 'Escape') { toggleFindReplace(false); } });
-
-      // Modal Buttons & Inputs
-      document.getElementById("closeNewFileModal").addEventListener("click", () => closeModal(newFileModal)); document.getElementById("cancelNewFile").addEventListener("click", () => closeModal(newFileModal)); document.getElementById("createNewFile").addEventListener("click", () => { if (createNewFile(newFileNameInput.value.trim(), newFileLangSelect.value)) closeModal(newFileModal); else newFileNameInput.focus(); });
-      document.getElementById("closeSaveAsModal").addEventListener("click", () => closeModal(saveAsModal)); document.getElementById("cancelSaveAs").addEventListener("click", () => closeModal(saveAsModal)); document.getElementById("confirmSaveAs").addEventListener("click", handleSaveAsConfirm);
-      newFileNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('createNewFile').click(); }); newFileLangSelect.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('createNewFile').click(); }); saveAsFileNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('confirmSaveAs').click(); });
-
-      // Global Keyboard Shortcuts
-      document.addEventListener("keydown", function(e) {
-        const modKey = e.metaKey || e.ctrlKey; const activeEl = document.activeElement; const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA'); const isModalOpen = newFileModal.style.display === 'block' || saveAsModal.style.display === 'block'; const isFindReplaceOpen = findReplaceContainerEl.style.display === 'flex';
-        if (editor.hasFocus() && !(isInputFocused && (isModalOpen || isFindReplaceOpen))) { return; } // Let CM handle editor keys
-        if (isInputFocused && (isModalOpen || isFindReplaceOpen)) { if (e.key === 'Escape') { if (isFindReplaceOpen && (activeEl === findInputEl || activeEl === replaceInputEl)) { toggleFindReplace(false); } } return; } // Let inputs handle keys (except Esc in find)
-        if (modKey && (e.key === "s" || e.key === "S")) { e.preventDefault(); if (e.shiftKey) { if (!saveAsBtn.disabled) { if (currentFileIndex >= 0 && files[currentFileIndex]) saveAsFileNameInput.value = files[currentFileIndex].name; else saveAsFileNameInput.value = ""; openModal(saveAsModal); } } else { if (!saveFileBtn.disabled) handleSaveClick(); } }
-        else if (modKey && (e.key === "o" || e.key === "O")) { e.preventDefault(); openFile(); }
-        else if (modKey && (e.key === "n" || e.key === "N")) { e.preventDefault(); newFileNameInput.value = ""; openModal(newFileModal); }
-        else if (e.key === 'Escape') { if (newFileModal.style.display === 'block') { e.preventDefault(); closeModal(newFileModal); } else if (saveAsModal.style.display === 'block') { e.preventDefault(); closeModal(saveAsModal); } }
-      });
-
-      // Warn before leaving page
-      window.addEventListener('beforeunload', (event) => { const hasUnsaved = files.some(file => file.unsaved); if (hasUnsaved) { const msg = 'You have unsaved changes. Are you sure you want to leave?'; event.preventDefault(); event.returnValue = msg; return msg; } });
-    }
+// --- Find & Replace Logic (Unchanged) ---
+function toggleFindReplace(show) {
+clearActiveSuggestion(false);
+findReplaceContainerEl.style.display = show ? "flex" : "none";
+if (show) { const selection = editor.getSelection(); if (selection) findInputEl.value = selection; findInputEl.focus(); findInputEl.select(); lastSearch.cursor = null; lastSearch.query = null; }
+else { editor.focus(); }
+}
+function find(reverse = false) { if (!editor) return; const query = findInputEl.value; if (!query) { setStatusMessage("Find: No query", true); return; } const caseSensitive = false; setStatusMessage(`Finding "${query}"...`); const searchCursor = editor.getSearchCursor(query, reverse ? editor.getCursor("from") : editor.getCursor("to"), { caseFold: !caseSensitive, reverse: reverse }); if (!searchCursor.find(reverse)) { const startPos = reverse ? CodeMirror.Pos(editor.lastLine()) : CodeMirror.Pos(0, 0); const wrapCursor = editor.getSearchCursor(query, startPos, { caseFold: !caseSensitive, reverse: reverse }); if (!wrapCursor.find(reverse)) { setStatusMessage(`"${query}" not found`); return; } editor.setSelection(wrapCursor.from(), wrapCursor.to()); setStatusMessage(`Found "${query}" (wrapped)`); } else { editor.setSelection(searchCursor.from(), searchCursor.to()); setStatusMessage(`Found "${query}"`); } editor.scrollIntoView({ from: editor.getCursor("from"), to: editor.getCursor("to") }, 50); }
+function replace() { if (!editor) return; const query = findInputEl.value; const replacement = replaceInputEl.value; const selection = editor.getSelection(); const caseSensitive = false; const selectionMatches = selection && (caseSensitive ? selection === query : selection.toLowerCase() === query.toLowerCase()); if (selection && selectionMatches) { editor.replaceSelection(replacement, "around"); setStatusMessage(`Replaced "${query}"`); find(false); } else { find(false); } }
+function replaceAll() { if (!editor) return; const query = findInputEl.value; const replacement = replaceInputEl.value; if (!query) { setStatusMessage("Replace All: No query", true); return; } const caseSensitive = false; let count = 0; editor.operation(() => { const cursor = editor.getSearchCursor(query, CodeMirror.Pos(0, 0), { caseFold: !caseSensitive }); while (cursor.findNext()) { cursor.replace(replacement); count++; } }); setStatusMessage(`Replaced ${count} instance(s) of "${query}"`); }
 
 
-    // --- App Entry Point ---
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOM Loaded, initializing editor...");
-        initEditor();
-        setupEventListeners();
-        if (currentFileIndex === -1) updateUIForFileStatus();
-        setStatusMessage("Editor ready (Alt+\\ for AI)");
-    });
+// --- Theme Management (Unchanged) ---
+function applyBodyThemeStyles(themeName) { const type = themeTypes[themeName] || 'dark'; if (type === 'light') { document.body.style.backgroundColor = "#ffffff"; document.body.style.color = "#333333"; } else { document.body.style.backgroundColor = "#282a36"; document.body.style.color = "#f8f8f2"; } }
+function cycleTheme() { currentThemeIndex = (currentThemeIndex + 1) % themes.length; const newTheme = themes[currentThemeIndex]; editor.setOption("theme", newTheme); applyBodyThemeStyles(newTheme); console.log(`Theme: ${newTheme}`); document.getElementById('themeToggle').title = `Current Theme: ${newTheme}`; setStatusMessage(`Theme set to ${newTheme}`); }
 
-  </script>
+
+// --- Modal Handling (Unchanged) ---
+function openModal(modalElement) {
+clearActiveSuggestion(false);
+modalElement.style.display = "block"; const firstInput = modalElement.querySelector('input[type="text"], select'); if (firstInput) { setTimeout(() => firstInput.focus(), 50); if (firstInput.select) firstInput.select(); }
+}
+function closeModal(modalElement) { modalElement.style.display = "none"; editor.focus(); }
+window.addEventListener('click', (event) => { if (event.target.classList.contains('modal')) closeModal(event.target); });
+
+
+// --- AI Suggestion Management (Unchanged) ---
+function clearActiveSuggestion(accepted = false) {
+if (activeSuggestionMarker) {
+const marker = activeSuggestionMarker; const markerId = marker.id; activeSuggestionMarker = null;
+console.log(`Clearing suggestion marker ${markerId}. Accepted: ${accepted}`);
+if (accepted) {
+// We don't need to do anything special here, the change event will handle it
+// Just ensure the marker is gone
+marker.clear();
+const range = marker.find(); // May be null after clear
+if (range) { editor.setCursor(range.to); }
+setStatusMessage("Suggestion accepted");
+} else {
+const range = marker.find(); // Get range *before* clearing
+marker.clear(); // Clear the marker styling
+if (range) {
+// Use operation for atomicity if replacing text
+editor.operation(() => {
+editor.replaceRange("", range.from, range.to, "+AIClear");
+});
+console.log(`Suggestion marker ${markerId} rejected and text removed.`);
+setStatusMessage("Suggestion dismissed");
+} else {
+console.log(`Suggestion marker ${markerId} rejected (marker cleared, range not found/already gone).`);
+setStatusMessage("Suggestion dismissed");
+}
+}
+// Auto-clear status message after a bit
+setTimeout(() => { if (statusMessageEl.textContent === "Suggestion accepted" || statusMessageEl.textContent === "Suggestion dismissed") { setStatusMessage(""); } }, 2000);
+}
+}
+
+// --- AI Completion (Unchanged structure, may need prompt tuning) ---
+async function triggerAICompletion() {
+if (!editor || isAICompleting || currentFileIndex < 0) { if (isAICompleting) setStatusMessage("AI is already working...", true); else setStatusMessage("AI Completion not available", true); return; }
+clearActiveSuggestion(false); isAICompleting = true; setStatusMessage("AI thinking...");
+try {
+const cursor = editor.getCursor(); const textBeforeCursor = editor.getRange(CodeMirror.Pos(0, 0), cursor); const promptText = textBeforeCursor.slice(-AI_PROMPT_MAX_CHARS);
+console.log("--- Sending Prompt to AI ---"); console.log(promptText);
+const completion = await fetchAICompletion(promptText);
+console.log("--- Raw Completion Received ---"); console.log(JSON.stringify(completion));
+if (completion && completion.trim() !== "") {
+const from = cursor; isInsertingAISuggestion = true; let marker;
+editor.operation(() => {
+editor.replaceRange(completion, from, from, "+AICompletion"); const to = editor.getCursor(); marker = editor.markText(from, to, { className: 'cm-ai-suggestion' }); activeSuggestionMarker = marker;
+// Add an event listener to the marker itself
+marker.on('clear', () => {
+// This ensures that if the marker is cleared by CM internally
+// (e.g., underlying text deleted), we reset our state.
+if (activeSuggestionMarker && activeSuggestionMarker.id === marker.id) {
+console.log(`Suggestion marker ${marker.id} cleared externally or by accept/reject.`);
+activeSuggestionMarker = null;
+// Optional: Reset insertion flag if necessary, though it should be false by now
+// isInsertingAISuggestion = false;
+}
+});
+});
+setStatusMessage("AI Suggestion: Tab=Accept, Esc=Dismiss"); console.log("AI Suggestion displayed:", completion);
+} else { console.warn("Completion was empty or null after processing."); setStatusMessage("AI returned no useful completion"); }
+} catch (error) { console.error("AI Completion Error:", error); setStatusMessage(`AI Error: ${error.message}`, true); clearActiveSuggestion(false); // Ensure suggestion is cleared on error
+} finally { isAICompleting = false; isInsertingAISuggestion = false; if (statusMessageEl.textContent === "AI thinking...") { setStatusMessage(""); } }
+}
+
+async function fetchAICompletion(prompt) {
+try {
+const requestBody = { prompt: prompt, n_predict: AI_COMPLETION_MAX_TOKENS, temperature: 0.7, stop: AI_COMPLETION_STOP_TOKENS };
+console.log("--- Sending Request Body ---"); console.log(JSON.stringify(requestBody, null, 2));
+const response = await fetch(LLAMA_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify(requestBody) });
+if (!response.ok) { throw new Error(`API request failed: ${response.status} ${response.statusText} - ${await response.text()}`); }
+const data = await response.json();
+console.log("--- Raw Response Data from Server ---"); console.log(JSON.stringify(data, null, 2));
+if (data && data.content) { return data.content.replace(/^\s+/, ""); } // Trim leading whitespace only
+else { console.warn("AI response format unexpected or 'content' field missing/empty in raw data:", data); return null; }
+} catch (error) { console.error("Fetch AI Completion failed:", error); throw new Error(`Could not reach AI server or parse response: ${error.message}`); }
+}
+
+
+// --- Event Listener Setup ---
+function setupEventListeners() {
+// Toolbar Buttons
+document.getElementById("newFileBtn").addEventListener("click", () => { newFileNameInput.value = ""; newFileLangSelect.value = "javascript"; /* Default */ openModal(newFileModal); }); // Reset lang on new
+document.getElementById("openFileBtn").addEventListener("click", openFile);
+saveFileBtn.addEventListener("click", handleSaveClick);
+saveAsBtn.addEventListener("click", () => { if (currentFileIndex >= 0 && files[currentFileIndex]) saveAsFileNameInput.value = files[currentFileIndex].name; else saveAsFileNameInput.value = ""; openModal(saveAsModal); });
+document.getElementById("findReplaceBtn").addEventListener("click", () => toggleFindReplace(true));
+document.getElementById("themeToggle").addEventListener("click", cycleTheme);
+document.getElementById('themeToggle').title = `Current Theme: ${themes[currentThemeIndex]}`;
+
+// Language Select Change
+languageSelectEl.addEventListener("change", function() {
+if (currentFileIndex >= 0 && files[currentFileIndex]) {
+clearActiveSuggestion(false);
+const newLang = this.value;
+files[currentFileIndex].language = newLang;
+editor.setOption("mode", newLang);
+// Enable/disable linting based on mode
+const lintableModes = ['javascript', 'typescript', 'json', 'css', 'htmlmixed', 'yaml'];
+editor.setOption("lint", lintableModes.includes(newLang));
+
+setStatusMessage(`Language set to ${this.options[this.selectedIndex].text}`);
+files[currentFileIndex].unsaved = true; // Changing language marks as unsaved
+updateUIForFileStatus(); // Update filename display, buttons etc.
+}
+});
+
+// Find/Replace Buttons & Inputs
+document.getElementById("findPrevBtn").addEventListener("click", () => find(true)); document.getElementById("findNextBtn").addEventListener("click", () => find(false)); document.getElementById("replaceBtn").addEventListener("click", replace); document.getElementById("replaceAllBtn").addEventListener("click", replaceAll); document.getElementById("closeFindBtn").addEventListener("click", () => toggleFindReplace(false));
+findInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); find(e.shiftKey); } else if (e.key === 'Escape') { toggleFindReplace(false); } });
+replaceInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); replace(); } else if (e.key === 'Escape') { toggleFindReplace(false); } });
+
+// Modal Buttons & Inputs
+document.getElementById("closeNewFileModal").addEventListener("click", () => closeModal(newFileModal)); document.getElementById("cancelNewFile").addEventListener("click", () => closeModal(newFileModal)); document.getElementById("createNewFile").addEventListener("click", () => {
+const name = newFileNameInput.value.trim();
+const lang = newFileLangSelect.value;
+// Suggest extension if none provided in name
+let finalName = name;
+if (name && name.indexOf('.') === -1) {
+finalName = name + getSuggestedExtension(lang);
+}
+// Re-check language based on final name in case user typed extension
+const finalLang = getLanguageFromFileName(finalName);
+
+if (createNewFile(finalName, finalLang)) {
+closeModal(newFileModal);
+} else {
+newFileNameInput.focus(); // Keep modal open on failure (e.g., empty name, duplicate)
+}
+});
+document.getElementById("closeSaveAsModal").addEventListener("click", () => closeModal(saveAsModal)); document.getElementById("cancelSaveAs").addEventListener("click", () => closeModal(saveAsModal)); document.getElementById("confirmSaveAs").addEventListener("click", handleSaveAsConfirm);
+newFileNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('createNewFile').click(); }); newFileLangSelect.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('createNewFile').click(); }); saveAsFileNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('confirmSaveAs').click(); });
+
+// Global Keyboard Shortcuts
+document.addEventListener("keydown", function(e) {
+const modKey = e.metaKey || e.ctrlKey; const activeEl = document.activeElement; const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA'); const isModalOpen = newFileModal.style.display === 'block' || saveAsModal.style.display === 'block'; const isFindReplaceOpen = findReplaceContainerEl.style.display === 'flex';
+if (editor && editor.hasFocus()) { return; } // Let CM handle keys if editor has focus
+if (isInputFocused && (isModalOpen || isFindReplaceOpen)) { if (e.key === 'Escape') { if (isFindReplaceOpen && (activeEl === findInputEl || activeEl === replaceInputEl)) { e.preventDefault(); toggleFindReplace(false); } } return; } // Let inputs handle keys (except Esc in find)
+if (modKey && (e.key === "s" || e.key === "S")) { e.preventDefault(); if (e.shiftKey) { if (!saveAsBtn.disabled) { if (currentFileIndex >= 0 && files[currentFileIndex]) saveAsFileNameInput.value = files[currentFileIndex].name; else saveAsFileNameInput.value = ""; openModal(saveAsModal); } } else { if (!saveFileBtn.disabled) handleSaveClick(); } }
+else if (modKey && (e.key === "o" || e.key === "O")) { e.preventDefault(); openFile(); }
+else if (modKey && (e.key === "n" || e.key === "N")) { e.preventDefault(); newFileNameInput.value = ""; newFileLangSelect.value = "javascript"; openModal(newFileModal); }
+else if (e.key === 'Escape') { if (newFileModal.style.display === 'block') { e.preventDefault(); closeModal(newFileModal); } else if (saveAsModal.style.display === 'block') { e.preventDefault(); closeModal(saveAsModal); } }
+});
+
+// Warn before leaving page
+window.addEventListener('beforeunload', (event) => { const hasUnsaved = files.some(file => file.unsaved); if (hasUnsaved) { const msg = 'You have unsaved changes. Are you sure you want to leave?'; event.preventDefault(); event.returnValue = msg; return msg; } });
+}
+
+
+// --- App Entry Point ---
+document.addEventListener('DOMContentLoaded', () => {
+console.log("DOM Loaded, initializing editor...");
+initEditor();
+setupEventListeners();
+if (currentFileIndex === -1) updateUIForFileStatus();
+setStatusMessage("Editor ready (Alt+\\ for AI)");
+});
+
+</script>
 </body>
 </html>
