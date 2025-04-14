@@ -3,94 +3,91 @@ LLamaEdit is a code editor with AI autocompletion powered by LLamaCPP and CodeMi
 Should work on any computer or operating system with a fairly modern web browser.
 The file operations have keyboard commands, mouse over to see them. Usage should be self-explanatory, alt+backspc to get suggested autocomplete, tab to accept, esc to cancel.
 
-# LLamaEdit User Documentation
 
-## 1. Introduction
+# LLamaEdit User Guide
 
-LLamaEdit is a web-based code editor featuring syntax highlighting, file management, find & replace, theme customization, and AI-powered code completion via a local Llama.cpp server.
+LLamaEdit is a web-based code editor featuring syntax highlighting, linting, theme customization, and AI-powered code completion via a local Llama.cpp server.
 
-## 2. Interface Overview
+## Getting Started
 
-*   **Navbar:** Displays the application title ("LLamaEdit") and the "Cycle Theme" button.
-*   **Toolbar:** Contains buttons for common file operations and access to Find/Replace.
-    *   **New:** Create a new file.
-    *   **Open:** Open a file from your computer.
-    *   **Save:** Save the current file (enabled for unsaved files).
-    *   **Save As:** Save the current file with a new name or location.
-    *   **Find/Replace:** Toggle the Find/Replace bar.
-    *   **Language Select:** Manually change the syntax highlighting for the current file.
-*   **Find/Replace Bar:** (Appears below the toolbar when activated) Allows searching and replacing text within the current file.
-*   **Sidebar:**
-    *   Lists currently open files.
-    *   The active file is highlighted.
-    *   An asterisk (`*`) next to a filename indicates unsaved changes.
-    *   Click a filename to switch to that file.
-    *   Click the `×` button next to a filename to close it (you'll be prompted if there are unsaved changes).
-*   **Editor Area:** The main area where you write and edit code, powered by CodeMirror.
-*   **Status Bar:** Located at the bottom.
-    *   **Left:** Shows the name of the currently open file and its save status.
-    *   **Center:** Displays status messages (e.g., "Saved", "AI thinking...", error messages).
-    *   **Right:** Shows the current cursor position (Line number, Column number).
+*   **New File**:
+    *   Click `File > New File` or the `New` button on the toolbar (`Ctrl+N`).
+    *   Enter a `File Name` (extension helps detect language) and select the `Language` in the modal. Click `Create`.
+*   **Open File**:
+    *   Click `File > Open File...` or the `Open` button on the toolbar (`Ctrl+O`).
+    *   Select a file from your computer using the file picker.
+    *   If a file with the same name is already open, you'll be prompted to reload it.
+*   **Saving Files**:
+    *   An asterisk (`*`) next to the filename (in the sidebar and status bar) indicates unsaved changes.
+    *   `File > Save` or the `Save` button on the toolbar (`Ctrl+S`) saves the current file.
+        *   If the file hasn't been saved before (or uses the legacy download method), it will act like "Save As".
+    *   `File > Save As...` (`Ctrl+Shift+S`) always prompts you to choose a name and location for the file.
 
-## 3. Core Features
+## Core Editing Features
 
-### 3.1. File Management
+*   **Syntax Highlighting**: Automatically applied based on the detected file language (from extension or manual selection).
+*   **Linting (Error/Warning Checking)**: Automatically runs for supported languages (JS, CSS, HTML, JSON, YAML). Errors/warnings are marked in the left gutter; hover over them for details.
+*   **AI Code Completion**:
+    *   Press `Alt+\` to request a code completion suggestion from the connected Llama.cpp server based on the preceding code.
+    *   The suggestion appears as grayed-out text.
+    *   Press `Tab` to accept the suggestion.
+    *   Press `Esc` or continue typing to reject the suggestion.
 
-*   **New File (`Ctrl+N` or "New" button):** Opens a dialog to enter a filename and select the language. Click "Create".
-*   **Open File (`Ctrl+O` or "Open" button):** Uses your browser's file picker to select a file. If a file with the same name is already open, you may be prompted to reload it.
-*   **Save File (`Ctrl+S` or "Save" button):** Saves changes to the current file. Uses the File System Access API if available (prompts for permission on first save), otherwise triggers a download. Enabled only when there are unsaved changes.
-*   **Save As (`Ctrl+Shift+S` or "Save As" button):** Opens a dialog to specify a new filename. Saves the file under the new name.
-*   **Switching Files:** Click the desired filename in the sidebar.
-*   **Closing Files:** Click the `×` button next to the filename in the sidebar.
+## Finding and Replacing Text
 
-### 3.2. Editing
+*   Open the Find/Replace bar via `Edit > Find/Replace...`, the `Find` button on the toolbar, or `Ctrl+F`.
+*   **Find Input**: Type your search query here.
+    *   Press `Enter` to find the next match.
+    *   Press `Shift+Enter` to find the previous match.
+*   **Replace Input**: Type the text to replace matches with.
+*   **Buttons**:
+    *   `Prev`/`Next`: Navigate through matches.
+    *   `Replace`: Replace the currently selected match and find the next one.
+    *   `Replace All`: Replace all occurrences in the file.
+    *   `×` (Close): Hides the Find/Replace bar (`Esc` also works).
 
-*   Standard text editing features.
-*   Syntax highlighting based on file extension or manual selection via the Language dropdown.
-*   Line numbers.
-*   Automatic bracket matching and closing.
+## File Management (Sidebar)
 
-### 3.3. AI Code Completion
+*   The left sidebar lists all open files.
+*   The currently active file is highlighted.
+*   An asterisk (`*`) indicates unsaved changes for a file.
+*   Click a filename to switch to that file.
+*   Click the `×` button next to a filename to close that file (`Ctrl+W` also closes the current file). You'll be prompted if there are unsaved changes.
 
-*   **Trigger:** Press `Alt+\` (Alt + Backslash) in the editor.
-*   **Process:** The text before your cursor is sent to your configured Llama.cpp server.
-*   **Suggestion:** If the AI provides a completion, it will appear as greyed-out, italicized text directly after your cursor.
-*   **Accept:** Press `Tab` to insert the suggestion.
-*   **Reject:** Press `Esc` or simply continue typing to dismiss the suggestion.
-*   **Status:** The status bar indicates when the AI is processing ("AI thinking...") or displays errors.
+## Customization
 
-**Note:** AI Completion requires a running Llama.cpp server accessible at the URL configured in the `LLAMA_API_URL` variable within the application's code (`http://localhost:8080/completion` by default).
+*   **Themes**: Change the editor and UI appearance via the `Theme` menu. Select from Light and Dark options.
+*   **Language**:
+    *   The language is usually auto-detected from the filename.
+    *   Manually change the language for the current file via `View > Language > [Select Language]`.
+    *   The current language is displayed in the status bar.
+*   **View Options**:
+    *   `View > Toggle Line Numbers`: Show/hide line numbers in the gutter.
+    *   `View > Toggle Line Wrapping`: Enable/disable text wrapping for long lines.
 
-### 3.4. Find & Replace
+## Status Bar
 
-*   **Open:** Click the "Find/Replace" button or press `Ctrl+F`.
-*   **Find:** Enter text in the "Find..." input.
-    *   Press `Enter` or click "Next" to find the next occurrence.
-    *   Press `Shift+Enter` or click "Prev" to find the previous occurrence.
-*   **Replace:** Enter replacement text in the "Replace with..." input.
-    *   Click "Replace" to replace the currently highlighted match and move to the next.
-    *   Click "Replace All" to replace all occurrences in the file.
-*   **Close:** Click the `×` button on the Find/Replace bar or press `Esc` while the bar has focus.
+Located at the bottom, it displays:
 
-### 3.5. Customization
+*   **Left**: Current `File Name` (with `*` if unsaved).
+*   **Middle**: Status messages (Ready, Saving, AI status, Errors).
+*   **Right**: Current `Language`, Cursor `Line` and `Column` position.
 
-*   **Themes:** Click the "Cycle Theme" button in the navbar to rotate through available editor themes (e.g., Dracula, Material, Solarized Light/Dark, etc.).
+## Keyboard Shortcuts
 
-## 4. Keyboard Shortcuts
-
-*   **New File:** `Ctrl+N`
-*   **Open File:** `Ctrl+O`
-*   **Save File:** `Ctrl+S`
-*   **Save As:** `Ctrl+Shift+S`
-*   **Find:** `Ctrl+F`
-*   **Find Next:** `Enter` (in Find input)
-*   **Find Previous:** `Shift+Enter` (in Find input)
-*   **Replace:** `Ctrl+H` (Opens Find/Replace with focus on Replace input - *standard CodeMirror binding, may vary slightly*)
-*   **Trigger AI Completion:** `Alt+\`
-*   **Accept AI Suggestion:** `Tab`
-*   **Dismiss AI Suggestion / Close Find/Replace / Close Modals:** `Esc`
-
-## 5. Important Notes
-
-*   **Unsaved Changes:** The application will warn you if you try to close a file with unsaved changes or leave the page with unsaved files.
-*   **AI Server:** Ensure your local Llama.cpp server is running and accessible at the configured `LLAMA_API_URL` for AI features to work.
+*   **File**:
+    *   `Ctrl+N`: New File
+    *   `Ctrl+O`: Open File
+    *   `Ctrl+S`: Save File
+    *   `Ctrl+Shift+S`: Save File As
+    *   `Ctrl+W`: Close Current File
+*   **Edit**:
+    *   `Ctrl+Z`: Undo
+    *   `Ctrl+Y` / `Shift+Cmd+Z` (Mac): Redo
+    *   `Ctrl+F`: Find/Replace
+*   **AI**:
+    *   `Alt+\`: Trigger AI Completion
+    *   `Tab`: Accept AI Suggestion
+    *   `Esc`: Reject AI Suggestion / Close Find Bar / Close Modals
+*   **General**:
+    *   `Ctrl+Space`: Trigger basic code hints (if available for the language).
