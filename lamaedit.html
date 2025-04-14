@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLamaEdit</title>
+<!-- CodeMirror Core -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+<!-- CodeMirror Base Addons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/dialog/dialog.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/search/search.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/search/searchcursor.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/dialog/dialog.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/javascript-hint.min.js"></script> <!-- Base JS hint -->
+<!-- CodeMirror Linting Addons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/lint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/lint.min.js"></script>
+<!-- Linters (Load *before* CM lint bridges) -->
+<script src="https://unpkg.com/jshint@2.13.6/dist/jshint.js"></script> <!-- JSHint for JS -->
+<script src="https://unpkg.com/jsonlint@1.6.3/web/jsonlint.js"></script> <!-- JSONLint (though CM might use built-in) -->
+<script src="https://unpkg.com/csslint@1.0.5/dist/csslint.js"></script> <!-- CSSLint -->
+<script src="https://unpkg.com/htmlhint@1.1.4/dist/htmlhint.js"></script> <!-- HTMLHint -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script> <!-- js-yaml for YAML -->
+<!-- CM Lint Bridges -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/javascript-lint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/json-lint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/css-lint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/html-lint.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/lint/yaml-lint.min.js"></script>
+<!-- CodeMirror Modes (Alphabetical - Add dependencies first if known) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/xml/xml.min.js"></script> <!-- Dependency for HTML, etc. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script> <!-- Dependency for HTML, PHP, TS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script> <!-- Dependency for HTML -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"></script> <!-- Depends on XML, JS, CSS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/clike/clike.min.js"></script> <!-- C, C++, C#, Java, Scala, Kotlin, Obj-C -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/go/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/lua/lua.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/markdown/markdown.min.js"></script> <!-- Depends on XML sometimes -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/perl/perl.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/php/php.min.js"></script> <!-- Depends on clike, htmlmixed, xml, js, css -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/r/r.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/ruby/ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/rust/rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/shell/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/swift/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/yaml/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script> <!-- Ensure JS is loaded for TS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/typescript/typescript.min.js"></script>
+<!-- CodeMirror Themes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/monokai.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/eclipse.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/base16-light.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/solarized.min.css">
+<style>
+/* General Styles */
+:root {
+    /* ... (color variables remain the same) ... */
+    --app-bg-light: #ececec; /* System-like light background */
+    --app-fg-light: #1e1e1e;
+    --menu-bg-light: #f0f0f0;
+    --toolbar-bg-light: #f5f5f5;
+    --sidebar-bg-light: #f8f8f8;
+    --statusbar-bg-light: #e0e0e0;
+    --border-color-light: #cccccc;
+    --button-bg-light: #e1e1e1;
+    --button-hover-bg-light: #d1d1d1;
+    --button-active-bg-light: #c1c1c1;
+    --button-fg-light: #222222;
+    --modal-bg-light: #ffffff;
+    --modal-header-bg-light: #f0f0f0;
+    --input-bg-light: #ffffff;
+    --input-border-light: #aaaaaa;
+    --input-focus-border-light: #0078d4;
+
+    --app-bg-dark: #2d2d2d; /* System-like dark background */
+    --app-fg-dark: #f1f1f1;
+    --menu-bg-dark: #383838;
+    --toolbar-bg-dark: #3c3c3c;
+    --sidebar-bg-dark: #333333;
+    --statusbar-bg-dark: #252525;
+    --border-color-dark: #444444;
+    --button-bg-dark: #555555;
+    --button-hover-bg-dark: #666666;
+    --button-active-bg-dark: #777777;
+    --button-fg-dark: #e0e0e0;
+    --modal-bg-dark: #424242;
+    --modal-header-bg-dark: #3a3a3a;
+    --input-bg-dark: #303030;
+    --input-border-dark: #555555;
+    --input-focus-border-dark: #0078d4;
+
+    --app-bg: var(--app-bg-dark);
+    --app-fg: var(--app-fg-dark);
+    --menu-bg: var(--menu-bg-dark);
+    --toolbar-bg: var(--toolbar-bg-dark);
+    --sidebar-bg: var(--sidebar-bg-dark);
+    --statusbar-bg: var(--statusbar-bg-dark);
+    --border-color: var(--border-color-dark);
+    --button-bg: var(--button-bg-dark);
+    --button-hover-bg: var(--button-hover-bg-dark);
+    --button-active-bg: var(--button-active-bg-dark);
+    --button-fg: var(--button-fg-dark);
+    --modal-bg: var(--modal-bg-dark);
+    --modal-header-bg: var(--modal-header-bg-dark);
+    --input-bg: var(--input-bg-dark);
+    --input-border: var(--input-border-dark);
+    --input-focus-border: var(--input-focus-border-dark);
+
+    --primary-color: #8be9fd;
+    --secondary-color: #bd93f9;
+    --danger-color: #ff5555;
+    --success-color: #50fa7b;
+    --warning-color: #ffb86c;
+    --info-color: #8be9fd;
+}
+
+/* Apply theme variables based on body class */
+body.theme-light {
+    --app-bg: var(--app-bg-light);
+    --app-fg: var(--app-fg-light);
+    --menu-bg: var(--menu-bg-light);
+    --toolbar-bg: var(--toolbar-bg-light);
+    --sidebar-bg: var(--sidebar-bg-light);
+    --statusbar-bg: var(--statusbar-bg-light);
+    --border-color: var(--border-color-light);
+    --button-bg: var(--button-bg-light);
+    --button-hover-bg: var(--button-hover-bg-light);
+    --button-active-bg: var(--button-active-bg-light);
+    --button-fg: var(--button-fg-light);
+    --modal-bg: var(--modal-bg-light);
+    --modal-header-bg: var(--modal-header-bg-light);
+    --input-bg: var(--input-bg-light);
+    --input-border: var(--input-border-light);
+    --input-focus-border: var(--input-focus-border-light);
+}
+
+html, body {
+    height: 100%; /* Ensure html and body take full height */
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent body scrollbars */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--app-bg);
+    color: var(--app-fg);
+    transition: background-color 0.2s, color 0.2s;
+    display: flex; /* Make body a flex container */
+    flex-direction: column; /* Stack app-container vertically */
+}
+
+/* Main Application Container */
+.app-container {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    height: 100%; /* Fill body */
+    /* border: 1px solid var(--border-color); Removed, might cause double borders */
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent container overflow */
+}
+
+/* Menu Bar */
+.menu-bar {
+    background-color: var(--menu-bg);
+    padding: 0 5px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0; /* Prevent shrinking */
+    height: 30px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+    z-index: 10; /* Above other content */
+}
+ul.menu { /* Styles for menu itself */
+    list-style: none; padding: 0; margin: 0; display: flex; height: 100%;
+}
+li.menu-item { /* Styles for top-level items like "File", "Edit" */
+    position: relative; /* Needed for submenu absolute positioning */
+    padding: 0 10px; cursor: default; display: flex; align-items: center;
+    height: 100%; font-size: 0.85rem; transition: background-color 0.1s;
+}
+li.menu-item:hover { background-color: var(--button-hover-bg); }
+ul.submenu { /* Styles for the dropdown lists */
+    display: none; position: absolute; top: 100%; left: 0;
+    background-color: var(--menu-bg); border: 1px solid var(--border-color);
+    border-top: none; list-style: none; padding: 5px 0; margin: 0;
+    min-width: 180px; z-index: 100; /* Ensure submenus are on top */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+li.menu-item:hover > ul.submenu { display: block; } /* Show on hover */
+li.submenu-item { /* Styles for individual items in dropdown */
+    padding: 6px 15px; font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+    transition: background-color 0.1s; display: flex; justify-content: space-between;
+    align-items: center;
+}
+li.submenu-item:hover { background-color: var(--button-hover-bg); }
+li.submenu-item.disabled { color: #888; cursor: not-allowed; background-color: transparent !important; }
+li.submenu-item kbd { font-size: 0.8em; color: #777; padding-left: 15px; }
+body.theme-light li.submenu-item kbd { color: #555; }
+body.theme-light li.submenu-item.disabled { color: #aaa; }
+.menu-separator { height: 1px; background-color: var(--border-color); margin: 5px 0; }
+/* Nested Submenu Styling */
+li.menu-item > ul.submenu > li.menu-item { /* Style nested trigger item */
+     /* Add indicator or adjust styling if needed */
+     position: relative; /* Needed for nested submenu positioning */
+}
+li.menu-item > ul.submenu > li.menu-item > ul.submenu { /* Position nested submenu */
+    top: -6px; /* Align top edge slightly above parent item (adjust as needed) */
+    left: 100%; /* Position to the right */
+    border-top: 1px solid var(--border-color); /* Add top border back */
+}
+
+
+/* Toolbar */
+.toolbar {
+    display: flex;
+    gap: 5px;
+    background-color: var(--toolbar-bg);
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Find/Replace Bar */
+.find-replace-container {
+    display: none; /* Hidden by default */
+    gap: 8px;
+    background-color: var(--toolbar-bg); /* Match toolbar */
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* --- Central Content Area --- */
+.editor-container {
+    flex: 1; /* Grow to fill available vertical space */
+    display: flex;
+    min-height: 0; /* Crucial for flexbox children height calculation */
+    overflow: hidden; /* Prevent content overflow */
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex; /* Use flex */
+    flex-direction: column; /* Stack title and list */
+    flex-shrink: 0; /* Prevent shrinking */
+    overflow: hidden; /* Hide overflow */
+}
+.sidebar h4 { /* Sidebar Title */
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--app-fg);
+    flex-shrink: 0; /* Don't shrink title */
+    border-bottom: 1px solid var(--border-color);
+}
+.file-list { /* List Container */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto; /* Allow list to scroll */
+    flex-grow: 1; /* Allow list to fill remaining sidebar space */
+}
+.file-item { /* Individual File Item */
+    padding: 5px 10px; display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.85rem; cursor: pointer; transition: background-color 0.1s;
+    white-space: nowrap; /* Prevent wrapping */
+    border-bottom: 1px solid transparent; /* Placeholder */
+}
+.file-item:hover { background-color: var(--button-hover-bg); }
+.file-item.active { background-color: var(--input-focus-border); color: white; font-weight: 500; }
+body.theme-light .file-item.active { color: white; }
+.file-name { overflow: hidden; text-overflow: ellipsis; margin-right: 5px; flex-grow: 1; } /* Allow name to grow */
+.file-name .unsaved-indicator { color: var(--warning-color); margin-left: 2px; font-weight: bold; }
+.file-remove { background: none; border: none; color: var(--danger-color); cursor: pointer;
+    font-size: 1rem; line-height: 1; padding: 0 4px; margin-left: auto;
+    flex-shrink: 0; opacity: 0.6; transition: opacity 0.15s, color 0.15s; }
+.file-item:hover .file-remove { opacity: 1; }
+.file-item.active .file-remove { color: white; }
+.file-remove:hover { color: #ff7777; opacity: 1; }
+
+
+/* Main Content (Editor Area Wrapper) */
+.main-content {
+    flex: 1; /* Grow to fill horizontal space */
+    display: flex; /* Needed for positioning editor */
+    flex-direction: column; /* Stack editor vertically (though it fills) */
+    min-width: 0; /* Crucial for horizontal shrinking */
+    position: relative; /* Anchor for absolute positioned editor */
+    overflow: hidden; /* Hide any overflow */
+}
+
+/* Editor (CodeMirror Instance) */
+#editor {
+    /* Styles applied via .CodeMirror wrapper below */
+}
+.CodeMirror { /* Target CodeMirror's main wrapper */
+    position: absolute; /* Fill parent main-content */
+    top: 0; left: 0; right: 0; bottom: 0;
+    height: 100% !important; /* Override CM default height */
+    font-size: 14px;
+    border: none; /* Remove default CM border */
+}
+/* Scrollbar Styling (Generic & Dracula Example) */
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler { background-color: transparent; }
+.CodeMirror-vscrollbar::-webkit-scrollbar { width: 12px; }
+.CodeMirror-vscrollbar::-webkit-scrollbar-track { background: var(--sidebar-bg); }
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.4); border: 3px solid transparent; background-clip: content-box; border-radius: 6px;}
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.6); }
+/* Dracula Specific Scrollbars (if needed) */
+.cm-s-dracula.CodeMirror { background-color: #282a36; }
+.cm-s-dracula .CodeMirror-scrollbar-filler, .cm-s-dracula .CodeMirror-gutter-filler { background-color: #282a36; }
+.cm-s-dracula .CodeMirror-vscrollbar::-webkit-scrollbar-track { background: #333338; }
+.cm-s-dracula .CodeMirror-vscrollbar::-webkit-scrollbar-thumb { background-color: #44475a; }
+.cm-s-dracula .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover { background-color: #6272a4; }
+
+
+/* Status Bar */
+.status-bar {
+    background-color: var(--statusbar-bg); padding: 0 5px; /* Reduce vertical padding */
+    font-size: 0.75rem; display: flex; justify-content: space-between; align-items: stretch; /* Stretch items vertically */
+    color: var(--app-fg); border-top: 1px solid var(--border-color);
+    flex-shrink: 0; /* Prevent shrinking */
+    user-select: none;
+    height: 22px; /* Fixed height */
+    line-height: 22px; /* Center text vertically */
+}
+#fileInfo, #cursorPosition, #statusMessage, #languageSelectStatus {
+    padding: 0 8px;
+    border-right: 1px solid var(--border-color);
+    white-space: nowrap;
+    display: flex; /* Align icon/text inside if needed */
+    align-items: center;
+}
+#fileInfo { border-left: 1px solid var(--border-color); }
+#statusMessage { flex-grow: 1; text-align: left; border-right: none; overflow: hidden; text-overflow: ellipsis; }
+#cursorPosition { border-right: none; }
+#languageSelectStatus { border-right: none; margin-left: 5px; }
+#languageSelectStatus select { display: none; }
+#languageSelectStatus span { cursor: default; }
+
+
+/* --- General Button Styling --- */
+button {
+    background-color: var(--button-bg); color: var(--button-fg); border: 1px solid var(--border-color);
+    padding: 4px 10px; border-radius: 3px; cursor: pointer; font-weight: normal;
+    transition: background-color 0.1s, border-color 0.1s; font-size: 0.85rem; line-height: 1.2;
+}
+button:hover { background-color: var(--button-hover-bg); /* No darker border on hover */ }
+button:active { background-color: var(--button-active-bg); }
+button:disabled { background-color: var(--button-bg) !important; border-color: var(--border-color) !important;
+    color: #888 !important; cursor: not-allowed; opacity: 0.6; }
+body.theme-light button:disabled { color: #aaa !important; }
+
+/* Toolbar Buttons */
+.toolbar button { padding: 3px 6px; }
+.toolbar button.primary { background-color: #4a90e2; color: white; border-color: #4a90e2; }
+.toolbar button.secondary { background-color: #6c757d; color: white; border-color: #6c757d; }
+.toolbar button.danger { background-color: #dc3545; color: white; border-color: #dc3545; }
+.toolbar button.primary:hover { background-color: #357abd; }
+.toolbar button.secondary:hover { background-color: #5a6268; }
+.toolbar button.danger:hover { background-color: #c82333; }
+body.theme-light .toolbar button.primary { background-color: #007bff; }
+body.theme-light .toolbar button.secondary { background-color: #6c757d; }
+body.theme-light .toolbar button.danger { background-color: #dc3545; }
+body.theme-light .toolbar button.primary:hover { background-color: #0056b3; }
+body.theme-light .toolbar button.secondary:hover { background-color: #545b62; }
+body.theme-light .toolbar button.danger:hover { background-color: #bd2130; }
+
+/* Find/Replace Elements */
+.find-replace-container input[type="text"] {
+    flex: 1; padding: 4px 6px; font-size: 0.85rem; min-width: 120px;
+    border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--app-fg);
+    border-radius: 2px;
+}
+.find-replace-container input[type="text"]:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 1px var(--input-focus-border); }
+.search-actions { display: flex; gap: 4px; }
+.search-actions button { padding: 3px 8px; font-size: 0.8rem; }
+#closeFindBtn { margin-left: 5px; padding: 2px 6px; font-size: 1rem; line-height: 1; background-color: transparent;
+    border: none; color: var(--app-fg); opacity: 0.7; }
+#closeFindBtn:hover { background-color: var(--danger-color); color: white; opacity: 1; }
+
+
+/* Linting Marker Style */
+.CodeMirror-lint-marker-error, .CodeMirror-lint-marker-warning { background-position: left bottom; background-repeat: repeat-x; }
+.CodeMirror-lint-marker-error { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAABJJREFUCB1j8DNk+M8wrrVfJQARAADO8SKkAX27wQAAAABJRU5ErkJggg=="); }
+.CodeMirror-lint-marker-warning { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAABRJREFUCB1j8Mvg/p+B6f8zVBEBAB59Ek9VRGuSAAAAAElFTkSuQmCC"); }
+.CodeMirror-lint-tooltip { background-color: var(--toolbar-bg) !important; border: 1px solid var(--border-color) !important; color: var(--app-fg) !important;
+    padding: 5px 8px !important; border-radius: 3px !important; font-size: 0.85em !important; z-index: 15 !important; box-shadow: 1px 1px 4px rgba(0,0,0,0.2); }
+
+/* AI Suggestion Style */
+.cm-ai-suggestion { color: #888; font-style: italic; background-color: rgba(128, 128, 128, 0.1); }
+
+/* Modals */
+.modal {
+    position: fixed; z-index: 200; /* Higher z-index */ left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);
+    /* Use flex centering */
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+}
+.modal.active { /* Use a class to show modal */
+    display: flex;
+}
+.modal-content { background-color: var(--modal-bg); color: var(--app-fg); padding: 0; border-radius: 4px; width: 450px;
+    max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid var(--border-color); overflow: hidden;
+    /* Remove absolute positioning */
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color); background-color: var(--modal-header-bg); }
+.modal-header h3 { margin: 0; font-size: 1.1rem; font-weight: 600; }
+.modal-close { color: var(--app-fg); font-size: 22px; font-weight: bold; cursor: pointer; line-height: 1;
+    padding: 0 5px; opacity: 0.7; transition: opacity 0.15s; }
+.modal-close:hover, .modal-close:focus { opacity: 1; text-decoration: none; outline: none; }
+.modal-body { padding: 20px; }
+.form-group { margin-bottom: 15px; }
+label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; }
+input[type="text"], select { box-sizing: border-box; width: 100%; padding: 8px 10px; border-radius: 3px;
+    border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--app-fg); font-size: 0.95em; }
+input[type="text"]:focus, select:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 1px var(--input-focus-border); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 15px; border-top: 1px solid var(--border-color);
+    background-color: var(--modal-header-bg); }
+.modal-actions button { font-weight: 500; }
+.modal-actions button.primary { background-color: var(--input-focus-border); color: white; border-color: var(--input-focus-border); }
+body.theme-light .modal-actions button.primary { color: white; }
+.modal-actions button.primary:hover { background-color: darken(var(--input-focus-border), 10%); border-color: darken(var(--input-focus-border), 10%); }
+
+</style>
+</head>
+<body class="theme-dark"> <!-- Default to dark -->
+
+<div class="app-container">
+
+<!-- Menu Bar -->
+<div class="menu-bar">
+<ul class="menu">
+<li class="menu-item">
+File
+<ul class="submenu">
+<li class="submenu-item" id="menu-new">New File<kbd>Ctrl+N</kbd></li>
+<li class="submenu-item" id="menu-open">Open File...<kbd>Ctrl+O</kbd></li>
+<li class="menu-separator"></li>
+<li class="submenu-item" id="menu-save" data-enabled="false">Save<kbd>Ctrl+S</kbd></li>
+<li class="submenu-item" id="menu-saveas" data-enabled="false">Save As...<kbd>Ctrl+Shift+S</kbd></li>
+<li class="menu-separator"></li>
+<li class="submenu-item" id="menu-closefile" data-enabled="false">Close File<kbd>Ctrl+W</kbd></li>
+</ul>
+</li>
+<li class="menu-item">
+Edit
+<ul class="submenu">
+<li class="submenu-item" id="menu-undo" data-enabled="false">Undo<kbd>Ctrl+Z</kbd></li>
+<li class="submenu-item" id="menu-redo" data-enabled="false">Redo<kbd>Ctrl+Y</kbd></li>
+<li class="menu-separator"></li>
+<li class="submenu-item" id="menu-find">Find/Replace...<kbd>Ctrl+F</kbd></li>
+<li class="menu-separator"></li>
+<li class="submenu-item" id="menu-ai-complete">AI Complete<kbd>Alt+\</kbd></li>
+</ul>
+</li>
+<li class="menu-item">
+View
+<ul class="submenu">
+<li class="menu-item"> <!-- Nested Menu Item for Language -->
+Language ▶ <!-- Use arrow or similar indicator -->
+<ul class="submenu language-submenu"> <!-- Nested Submenu for Languages -->
+<!-- Language options will be populated by JS -->
+</ul>
+</li>
+<li class="submenu-item" id="menu-toggle-linenumbers">Toggle Line Numbers</li>
+<li class="submenu-item" id="menu-toggle-wrapping">Toggle Line Wrapping</li>
+</ul>
+</li>
+<li class="menu-item">
+Theme
+<ul class="submenu" id="theme-menu">
+<!-- Theme options will be populated by JS -->
+</ul>
+</li>
+</ul>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+<button id="toolbar-new" title="New File (Ctrl+N)">New</button>
+<button id="toolbar-open" title="Open File (Ctrl+O)">Open</button>
+<button id="toolbar-save" title="Save (Ctrl+S)" disabled>Save</button>
+<button id="toolbar-find" class="secondary" title="Find & Replace (Ctrl+F)">Find</button>
+</div>
+
+<!-- Find/Replace Bar -->
+<div class="find-replace-container" id="findReplaceContainer">
+<input type="text" id="findInput" placeholder="Find...">
+<input type="text" id="replaceInput" placeholder="Replace with...">
+<div class="search-actions">
+<button id="findPrevBtn" class="secondary" title="Find Previous (Shift+Enter)">Prev</button>
+<button id="findNextBtn" class="secondary" title="Find Next (Enter)">Next</button>
+<button id="replaceBtn" class="secondary" title="Replace Current">Replace</button>
+<button id="replaceAllBtn" class="secondary" title="Replace All">Replace All</button>
+</div>
+<button id="closeFindBtn" title="Close (Esc)">&times;</button>
+</div>
+
+<!-- Editor Area -->
+<div class="editor-container">
+<div class="sidebar">
+<h4>Files</h4>
+<ul class="file-list" id="fileList"></ul>
+</div>
+<div class="main-content">
+<div id="editor"></div> <!-- CodeMirror attaches here -->
+</div>
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar">
+<div id="fileInfo">No file opened</div>
+<div id="statusMessage">Ready</div>
+<div id="languageSelectStatus">
+<span id="languageDisplay">Plain Text</span>
+<!-- Hidden select for actual value mapping -->
+<select id="languageSelect" style="display: none;">
+ <!-- Options are duplicated here and in the modal for simplicity, could be DRY'd -->
+ <option value="javascript">JavaScript</option>
+ <option value="typescript">TypeScript</option>
+ <option value="htmlmixed">HTML</option>
+ <option value="css">CSS</option>
+ <option value="python">Python</option>
+ <option value="java">Java</option>
+ <option value="text/x-c++src">C++</option>
+ <option value="text/x-csharp">C#</option>
+ <option value="php">PHP</option>
+ <option value="ruby">Ruby</option>
+ <option value="go">Go</option>
+ <option value="swift">Swift</option>
+ <option value="rust">Rust</option>
+ <option value="kotlin">Kotlin</option>
+ <option value="scala">Scala</option>
+ <option value="sql">SQL</option>
+ <option value="shell">Shell Script</option>
+ <option value="perl">Perl</option>
+ <option value="r">R</option>
+ <option value="lua">Lua</option>
+ <option value="markdown">Markdown</option>
+ <option value="yaml">YAML</option>
+ <option value="xml">XML</option>
+ <option value="text/plain">Plain Text</option>
+</select>
+</div>
+<div id="cursorPosition">Ln 1, Col 1</div>
+</div>
+
+</div> <!-- End App Container -->
+
+
+<!-- New File Modal -->
+<div id="newFileModal" class="modal"> <!-- Add active class via JS -->
+<div class="modal-content">
+<div class="modal-header">
+<h3>Create New File</h3>
+<span class="modal-close" id="closeNewFileModal" title="Close">&times;</span>
+</div>
+<div class="modal-body">
+<div class="form-group">
+<label for="newFileName">File Name:</label>
+<input type="text" id="newFileName" placeholder="e.g., script.js, main.py">
+</div>
+<div class="form-group">
+<label for="newFileLanguage">Language:</label>
+<select id="newFileLanguage">
+<option value="javascript">JavaScript (.js)</option>
+<option value="typescript">TypeScript (.ts)</option>
+<option value="htmlmixed">HTML (.html)</option>
+<option value="css">CSS (.css)</option>
+<option value="python">Python (.py)</option>
+<option value="java">Java (.java)</option>
+<option value="text/x-c++src">C++ (.cpp)</option>
+<option value="text/x-csharp">C# (.cs)</option>
+<option value="php">PHP (.php)</option>
+<option value="ruby">Ruby (.rb)</option>
+<option value="go">Go (.go)</option>
+<option value="swift">Swift (.swift)</option>
+<option value="rust">Rust (.rs)</option>
+<option value="kotlin">Kotlin (.kt)</option>
+<option value="scala">Scala (.scala)</option>
+<option value="sql">SQL (.sql)</option>
+<option value="shell">Shell Script (.sh)</option>
+<option value="perl">Perl (.pl)</option>
+<option value="r">R (.r)</option>
+<option value="lua">Lua (.lua)</option>
+<option value="markdown">Markdown (.md)</option>
+<option value="yaml">YAML (.yaml, .yml)</option>
+<option value="xml">XML (.xml)</option>
+<option value="text/plain">Plain Text (.txt)</option>
+</select>
+</div>
+</div>
+<div class="modal-actions">
+<button id="cancelNewFile" class="secondary">Cancel</button>
+<button id="createNewFile" class="primary">Create</button>
+</div>
+</div>
+</div>
+
+<!-- Save As Modal -->
+<div id="saveAsModal" class="modal"> <!-- Add active class via JS -->
+<div class="modal-content">
+<div class="modal-header">
+<h3>Save File As</h3>
+<span class="modal-close" id="closeSaveAsModal" title="Close">&times;</span>
+</div>
+<div class="modal-body">
+<div class="form-group">
+<label for="saveAsFileName">File Name:</label>
+<input type="text" id="saveAsFileName" placeholder="example.js">
+</div>
+</div>
+<div class="modal-actions">
+<button id="cancelSaveAs" class="secondary">Cancel</button>
+<button id="confirmSaveAs" class="primary">Save</button>
+</div>
+</div>
+</div>
+
+
+<script>
+// Make linters available globally for CodeMirror addons
+window.JSHINT = JSHINT;
+window.CSSLint = CSSLint;
+window.HTMLHint = HTMLHint;
+window.jsyaml = jsyaml; // Make js-yaml available
+
+// --- AI Configuration ---
+const LLAMA_API_URL = 'http://localhost:8080/completion'; // <<< Your Llama.cpp server URL
+const AI_COMPLETION_MAX_TOKENS = 128;
+const AI_COMPLETION_STOP_TOKENS = ["\n", "\t", ";", "}", ")", "<|EOT|>", "```"]; // Example stops
+const AI_PROMPT_MAX_CHARS = 2048;
+
+// --- State Variables ---
+let files = [];
+let currentFileIndex = -1;
+let editor;
+let lastSearch = { query: null, cursor: null, findInputEl: null, replaceInputEl: null };
+let isAICompleting = false;
+let activeSuggestionMarker = null;
+let isInsertingAISuggestion = false;
+
+// Theme Management
+const appThemes = {
+    "System Light": { cm: "default", type: "light" }, // Use CM 'default' for light system
+    "System Dark": { cm: "dracula", type: "dark" },   // Use CM 'dracula' for dark system
+    "Dracula": { cm: "dracula", type: "dark" },
+    "Material": { cm: "material", type: "dark" },
+    "Monokai": { cm: "monokai", type: "dark" },
+    "Eclipse": { cm: "eclipse", type: "light" },
+    "Base16 Light": { cm: "base16-light", type: "light" },
+    "Solarized Light": { cm: "solarized light", type: "light" },
+    "Solarized Dark": { cm: "solarized dark", type: "dark" },
+};
+let currentAppTheme = "System Dark"; // Default Theme Name
+
+// --- DOM Element References ---
+const fileListEl = document.getElementById("fileList");
+const editorContainerEl = document.getElementById("editor"); // Container for CM instance
+const cursorPositionEl = document.getElementById("cursorPosition");
+const fileInfoEl = document.getElementById("fileInfo");
+const languageSelectEl = document.getElementById("languageSelect"); // Hidden select
+const languageDisplayEl = document.getElementById("languageDisplay"); // Span in status bar
+const saveFileBtn = document.getElementById("toolbar-save"); // Toolbar button
+const saveAsBtn = document.getElementById("menu-saveas"); // Menu item now (used for state check)
+const findReplaceContainerEl = document.getElementById("findReplaceContainer");
+const findInputEl = document.getElementById("findInput");
+const replaceInputEl = document.getElementById("replaceInput");
+lastSearch.findInputEl = findInputEl;
+lastSearch.replaceInputEl = replaceInputEl;
+const newFileModal = document.getElementById("newFileModal");
+const saveAsModal = document.getElementById("saveAsModal");
+const newFileNameInput = document.getElementById("newFileName");
+const newFileLangSelect = document.getElementById("newFileLanguage");
+const saveAsFileNameInput = document.getElementById("saveAsFileName");
+const statusMessageEl = document.getElementById("statusMessage");
+
+// Menu Item Refs
+const menuSave = document.getElementById('menu-save');
+const menuSaveAs = document.getElementById('menu-saveas');
+const menuCloseFile = document.getElementById('menu-closefile');
+const menuUndo = document.getElementById('menu-undo');
+const menuRedo = document.getElementById('menu-redo');
+const languageSubmenu = document.querySelector('.language-submenu');
+const themeMenu = document.getElementById('theme-menu');
+
+
+// --- Initialization ---
+function initEditor() {
+    const initialTheme = appThemes[currentAppTheme];
+    editor = CodeMirror(editorContainerEl, {
+        mode: "javascript", // Default mode
+        theme: initialTheme.cm, // Use CM theme from config
+        lineNumbers: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        indentUnit: 2,
+        tabSize: 2,
+        indentWithTabs: false,
+        lineWrapping: false,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-lint-markers"], // Added lint gutter
+        lint: false, // Start disabled, enable per file
+        extraKeys: {
+            "Ctrl-Space": "autocomplete",
+            "Ctrl-F": () => { toggleFindReplace(true); }, // Use own handler
+            "Cmd-F": () => { toggleFindReplace(true); },
+            "Ctrl-H": "replace", // CM default replace
+            "Cmd-Option-F": "replace", // CM default replace
+            "Esc": function(cm) {
+                if (activeSuggestionMarker) { clearActiveSuggestion(false); return; }
+                if (findReplaceContainerEl.style.display !== 'none') { toggleFindReplace(false); return; } // Use custom toggle
+
+                // Close open menus if Esc is pressed outside of other contexts
+                const openMenus = document.querySelectorAll('.menu-item:hover > ul.submenu');
+                 if (openMenus.length > 0) {
+                    // Focusing editor is usually enough to close hover menus
+                    if (editor) editor.focus();
+                    return; // Prevent further Esc propagation
+                 }
+
+                // Close lint tooltips
+                const lintTooltips = document.querySelectorAll('.CodeMirror-lint-tooltip');
+                let closedTooltip = false;
+                lintTooltips.forEach(tip => {
+                    if (tip && tip.parentNode) { tip.parentNode.removeChild(tip); closedTooltip = true; }
+                });
+                if (closedTooltip) return; // Prevent other Esc actions
+
+                // Close modals (handled by class now, but keep Esc as a backup)
+                const openModalEl = document.querySelector('.modal.active');
+                if (openModalEl) {
+                    closeModal(openModalEl);
+                    return;
+                }
+
+                return CodeMirror.Pass; // Pass Esc if nothing else handled
+            },
+            "Alt-\\": function(cm) { triggerAICompletion(); },
+            "Tab": function(cm) { if (activeSuggestionMarker) { clearActiveSuggestion(true); return; } return CodeMirror.Pass; },
+            "Ctrl-S": handleSaveClick,
+            "Cmd-S": handleSaveClick,
+            "Ctrl-Shift-S": handleSaveAsClick,
+            "Cmd-Shift-S": handleSaveAsClick,
+            "Ctrl-O": openFile,
+            "Cmd-O": openFile,
+            "Ctrl-N": handleNewClick,
+            "Cmd-N": handleNewClick,
+            "Ctrl-W": handleCloseFileClick, // Close current file
+            "Cmd-W": handleCloseFileClick,
+            "Ctrl-Z": () => editor.undo(),
+            "Cmd-Z": () => editor.undo(),
+            "Ctrl-Y": () => editor.redo(),
+            "Cmd-Y": () => editor.redo(), // Windows style redo
+            "Shift-Cmd-Z": () => editor.redo(), // Mac style redo
+        }
+    });
+
+    editor.on("cursorActivity", handleCursorActivity);
+    editor.on("change", handleEditorChange);
+    editor.on("changes", updateUndoRedoState); // Update menu on changes
+
+    applyAppTheme(currentAppTheme); // Apply initial theme to body/UI
+    populateLanguageMenu();
+    populateThemeMenu();
+    updateUIForFileStatus();
+    updateUndoRedoState(); // Initial check
+}
+
+// --- UI Update Functions ---
+function handleCursorActivity() {
+    if (!editor) return; // Guard against calls before editor is initialized
+    const cursor = editor.getCursor();
+    cursorPositionEl.textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
+
+    // Clear suggestion if cursor moves out of it
+    if (activeSuggestionMarker) {
+        const markerRange = activeSuggestionMarker.find();
+        if (markerRange) {
+            const currentCursor = editor.getCursor();
+            // Check if cursor is strictly before 'from' or strictly after 'to'
+            if (CodeMirror.cmpPos(currentCursor, markerRange.from) < 0 ||
+                CodeMirror.cmpPos(currentCursor, markerRange.to) > 0) {
+                clearActiveSuggestion(false);
+            }
+        } else {
+            clearActiveSuggestion(false); // Marker gone
+        }
+    }
+}
+
+function handleEditorChange(cm, change) {
+    if (isInsertingAISuggestion) { return; } // Ignore changes during AI insert
+    if (activeSuggestionMarker) { clearActiveSuggestion(false); } // Clear suggestion on user typing
+
+    if (currentFileIndex >= 0 && files[currentFileIndex] && !files[currentFileIndex].unsaved) {
+        // Mark unsaved on most user actions, excluding programmatic setValue, lint fixes, etc.
+        if (change.origin !== 'setValue' && change.origin !== '*lint*' && change.origin !== '+AIClear' && change.origin !== '+AICompletion') {
+             files[currentFileIndex].unsaved = true;
+             updateFileList();
+             updateFileInfo();
+             updateSaveButtonState();
+        }
+    }
+}
+
+function updateUndoRedoState() {
+    if (!editor) return;
+    const history = editor.historySize();
+    setMenuItemEnabled(menuUndo, history.undo > 0);
+    setMenuItemEnabled(menuRedo, history.redo > 0);
+}
+
+
+function updateFileList() {
+    fileListEl.innerHTML = ""; // Clear existing items
+    if (files.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No files open";
+        li.style.padding = "10px";
+        li.style.color = "var(--app-fg)";
+        li.style.opacity = "0.6";
+        li.style.fontSize = "0.85rem";
+        li.style.textAlign = "center";
+        fileListEl.appendChild(li);
+        return;
+    }
+    files.forEach((file, index) => {
+        const li = document.createElement("li");
+        li.className = `file-item ${index === currentFileIndex ? "active" : ""}`;
+        li.title = file.name;
+        li.dataset.index = index;
+        li.onclick = () => openFileByIndex(index);
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "file-name";
+        nameSpan.textContent = file.name;
+        if (file.unsaved) {
+            const unsavedIndicator = document.createElement("span");
+            unsavedIndicator.className = "unsaved-indicator";
+            unsavedIndicator.textContent = " *"; // Space before asterisk
+            unsavedIndicator.title = "Unsaved changes";
+            nameSpan.appendChild(unsavedIndicator);
+        }
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "file-remove";
+        removeBtn.innerHTML = "&times;"; // Use times symbol
+        removeBtn.title = `Close ${file.name}`;
+        removeBtn.dataset.index = index;
+        removeBtn.onclick = (e) => {
+            e.stopPropagation(); // Prevent li click
+            removeFile(index);
+        };
+
+        li.appendChild(nameSpan);
+        li.appendChild(removeBtn);
+        fileListEl.appendChild(li);
+    });
+}
+
+function updateFileInfo() {
+    if (currentFileIndex >= 0 && files[currentFileIndex]) {
+        const file = files[currentFileIndex];
+        fileInfoEl.textContent = `${file.name}${file.unsaved ? "*" : ""}`; // Use asterisk in status bar too
+        // Update language display in status bar
+        const langOption = languageSelectEl.querySelector(`option[value="${file.language}"]`);
+        languageDisplayEl.textContent = langOption ? langOption.text : file.language;
+        languageDisplayEl.title = `Language: ${languageDisplayEl.textContent}`;
+        languageSelectEl.value = file.language; // Keep hidden select synced
+    } else {
+        fileInfoEl.textContent = "No file opened";
+        languageDisplayEl.textContent = "Plain Text";
+        languageDisplayEl.title = `Language: Plain Text`;
+        languageSelectEl.value = "text/plain";
+        cursorPositionEl.textContent = `Ln 1, Col 1`;
+    }
+}
+
+function updateSaveButtonState() {
+    const hasActiveFile = currentFileIndex >= 0 && files[currentFileIndex];
+    const isUnsaved = hasActiveFile && files[currentFileIndex].unsaved;
+
+    saveFileBtn.disabled = !isUnsaved; // Toolbar save button
+    setMenuItemEnabled(menuSave, isUnsaved);
+    setMenuItemEnabled(menuSaveAs, hasActiveFile);
+    setMenuItemEnabled(menuCloseFile, hasActiveFile);
+}
+
+function setMenuItemEnabled(menuItemElement, enabled) {
+    if (!menuItemElement) return;
+    menuItemElement.classList.toggle('disabled', !enabled);
+    menuItemElement.dataset.enabled = enabled ? 'true' : 'false'; // Store state if needed
+}
+
+function updateLanguageDropdownState() {
+    // Language is now changed via View menu, status bar just displays it.
+    const hasActiveFile = currentFileIndex >= 0 && files[currentFileIndex];
+    // Update checkmark in language submenu
+    updateLanguageMenuSelection();
+}
+
+function updateUIForFileStatus() {
+    updateFileList();
+    updateFileInfo();
+    updateSaveButtonState();
+    updateLanguageDropdownState(); // Update language menu state/checkmark
+    updateUndoRedoState(); // History changes when file changes
+}
+
+function setStatusMessage(message = "", isError = false, duration = 0) {
+    statusMessageEl.textContent = message;
+    statusMessageEl.style.color = isError ? "var(--danger-color)" : "var(--app-fg)";
+    statusMessageEl.style.fontWeight = isError ? "bold" : "normal";
+
+    // Clear message after duration if specified
+    if (duration > 0) {
+        setTimeout(() => {
+            // Clear only if the message hasn't changed in the meantime
+            if (statusMessageEl.textContent === message) {
+                setStatusMessage("Ready"); // Reset to default
+            }
+        }, duration);
+    }
+}
+
+
+// --- File Management Logic ---
+function setActiveFile(index) {
+    console.log(`setActiveFile called with index: ${index}`);
+    clearActiveSuggestion(false); // Clear suggestion when switching files
+
+    if (index < 0 || index >= files.length) {
+        currentFileIndex = -1;
+        if (editor) { // Check if editor exists
+            editor.setValue("");
+            editor.clearHistory();
+            editor.setOption("mode", "text/plain");
+            editor.setOption("lint", false); // Disable linting if no file
+            editor.setOption("readOnly", true); // Make editor read-only when no file
+            console.log("Editor set to read-only, no file active.");
+        }
+        updateUIForFileStatus();
+        return;
+    }
+
+    if (index === currentFileIndex) return; // Already active
+    if (!editor) return; // Cannot proceed without editor
+
+    currentFileIndex = index;
+    const file = files[currentFileIndex];
+
+    // Use operation to ensure setValue and mode change are atomic
+    editor.operation(() => {
+        editor.setOption("readOnly", false); // Ensure editable
+        editor.setValue(file.content);
+        editor.setOption("mode", file.language);
+        // Enable/disable linting based on whether we have a linter for the mode
+        const lintableModes = ['javascript', 'typescript', 'json', 'css', 'htmlmixed', 'yaml'];
+        editor.setOption("lint", lintableModes.includes(file.language));
+        console.log(`Switched to file ${file.name}. Mode: ${file.language}, Linting: ${editor.getOption("lint")}`);
+    });
+    editor.clearHistory(); // Clear history after setting content
+    editor.focus();
+    updateUIForFileStatus(); // Update UI after everything is set
+}
+
+function openFileByIndex(index) { setActiveFile(index); }
+
+function createNewFile(name, language) {
+    if (!name) {
+        setStatusMessage("File name cannot be empty.", true, 3000);
+        alert("File name cannot be empty."); return false;
+    }
+    if (files.some(f => f.name === name)) {
+         setStatusMessage(`File "${name}" already exists.`, true, 3000);
+         alert(`A file named "${name}" already exists.`); return false;
+    }
+    const newFile = { name: name, content: "", language: language, unsaved: true, handle: null };
+    files.push(newFile);
+    clearActiveSuggestion(false);
+    setActiveFile(files.length - 1);
+    setStatusMessage(`Created ${name}`, false, 3000);
+    return true;
+}
+
+function removeFile(index) {
+    if (index < 0 || index >= files.length) return;
+    const fileToRemove = files[index];
+    if (fileToRemove.unsaved) {
+        // Use confirm dialog, more native-like
+        const discard = window.confirm(`Discard unsaved changes in "${fileToRemove.name}"?`);
+        if (!discard) return; // User cancelled
+    }
+
+    const closingCurrent = (index === currentFileIndex);
+    const name = files[index].name; // Get name before splicing
+    files.splice(index, 1);
+
+    let nextIndex = -1;
+    if (files.length === 0) {
+        nextIndex = -1; // No files left
+    } else if (closingCurrent) {
+        // If closing current, select previous or first
+        nextIndex = Math.max(0, index - 1);
+    } else {
+        // If closing non-current, adjust index if needed
+        nextIndex = (currentFileIndex > index) ? currentFileIndex - 1 : currentFileIndex;
+    }
+
+    clearActiveSuggestion(false);
+    setActiveFile(nextIndex); // Switch to the determined next file
+    setStatusMessage(`Closed ${name}`, false, 3000);
+}
+
+
+// --- File Saving/Loading Helpers ---
+function getMimeType(language) {
+    switch (language) {
+        case "javascript": return "text/javascript";
+        case "typescript": return "text/typescript";
+        case "htmlmixed": return "text/html";
+        case "css": return "text/css";
+        case "xml": return "application/xml";
+        case "python": return "text/x-python";
+        case "java": return "text/x-java-source";
+        case "text/x-c++src": return "text/x-c++src";
+        case "text/x-csharp": return "text/x-csharp";
+        case "php": return "application/x-httpd-php";
+        case "ruby": return "text/x-ruby";
+        case "go": return "text/x-go";
+        case "swift": return "text/x-swift";
+        case "rust": return "text/rust";
+        case "kotlin": return "text/x-kotlin";
+        case "scala": return "text/x-scala";
+        case "sql": return "application/sql";
+        case "shell": return "application/x-sh";
+        case "perl": return "text/x-perl";
+        case "r": return "text/x-r-source";
+        case "lua": return "text/x-lua";
+        case "markdown": return "text/markdown";
+        case "yaml": return "application/x-yaml";
+        case "json": return "application/json";
+        case "text/plain": default: return "text/plain";
+    }
+}
+function getSuggestedExtension(language) {
+    switch (language) {
+        case "javascript": return ".js";
+        case "typescript": return ".ts";
+        case "htmlmixed": return ".html";
+        case "css": return ".css";
+        case "xml": return ".xml";
+        case "python": return ".py";
+        case "java": return ".java";
+        case "text/x-c++src": return ".cpp";
+        case "text/x-csharp": return ".cs";
+        case "php": return ".php";
+        case "ruby": return ".rb";
+        case "go": return ".go";
+        case "swift": return ".swift";
+        case "rust": return ".rs";
+        case "kotlin": return ".kt";
+        case "scala": return ".scala";
+        case "sql": return ".sql";
+        case "shell": return ".sh";
+        case "perl": return ".pl";
+        case "r": return ".r";
+        case "lua": return ".lua";
+        case "markdown": return ".md";
+        case "yaml": return ".yaml";
+        case "json": return ".json";
+        case "text/plain": default: return ".txt";
+    }
+}
+function getLanguageFromFileName(name) {
+    if (!name || name.indexOf('.') === -1) return "text/plain";
+    const extension = name.split('.').pop().toLowerCase();
+    switch (extension) {
+        case "js": case "mjs": case "cjs": return "javascript";
+        case "ts": case "tsx": return "typescript";
+        case "html": case "htm": return "htmlmixed";
+        case "css": return "css";
+        case "xml": case "svg": case "rss": case "atom": return "xml";
+        case "py": case "pyw": return "python";
+        case "java": return "java";
+        case "c": case "h": return "text/x-csrc";
+        case "cpp": case "cxx": case "hpp": case "hxx": return "text/x-c++src";
+        case "cs": return "text/x-csharp";
+        case "php": case "php3": case "php4": case "php5": case "phtml": return "php";
+        case "rb": return "ruby";
+        case "go": return "go";
+        case "swift": return "swift";
+        case "rs": return "rust";
+        case "kt": case "kts": return "kotlin";
+        case "scala": return "scala";
+        case "sql": return "sql";
+        case "sh": case "bash": case "zsh": return "shell";
+        case "pl": case "pm": return "perl";
+        case "r": return "r";
+        case "lua": return "lua";
+        case "md": case "markdown": return "markdown";
+        case "yaml": case "yml": return "yaml";
+        case "json": return "application/json"; // Often aliased to JS mode
+        case "txt": default: return "text/plain";
+    }
+}
+function getFilePickerTypes() {
+    return [
+        { description: 'JavaScript', accept: { 'text/javascript': ['.js', '.mjs', '.cjs'] } },
+        { description: 'TypeScript', accept: { 'text/typescript': ['.ts', '.tsx'] } },
+        { description: 'HTML', accept: { 'text/html': ['.html', '.htm'] } },
+        { description: 'CSS', accept: { 'text/css': ['.css'] } },
+        { description: 'Python', accept: { 'text/x-python': ['.py', '.pyw'] } },
+        { description: 'Java', accept: { 'text/x-java-source': ['.java'] } },
+        { description: 'C++', accept: { 'text/x-c++src': ['.cpp', '.cxx', '.hpp', '.hxx'] } },
+        { description: 'C#', accept: { 'text/x-csharp': ['.cs'] } },
+        { description: 'PHP', accept: { 'application/x-httpd-php': ['.php', '.phtml'] } },
+        { description: 'Ruby', accept: { 'text/x-ruby': ['.rb'] } },
+        { description: 'Go', accept: { 'text/x-go': ['.go'] } },
+        { description: 'Swift', accept: { 'text/x-swift': ['.swift'] } },
+        { description: 'Rust', accept: { 'text/rust': ['.rs'] } },
+        { description: 'Kotlin', accept: { 'text/x-kotlin': ['.kt', '.kts'] } },
+        { description: 'Scala', accept: { 'text/x-scala': ['.scala'] } },
+        { description: 'SQL', accept: { 'application/sql': ['.sql'] } },
+        { description: 'Shell Script', accept: { 'application/x-sh': ['.sh', '.bash', '.zsh'] } },
+        { description: 'Perl', accept: { 'text/x-perl': ['.pl', '.pm'] } },
+        { description: 'R Script', accept: { 'text/x-r-source': ['.r'] } },
+        { description: 'Lua', accept: { 'text/x-lua': ['.lua'] } },
+        { description: 'Markdown', accept: { 'text/markdown': ['.md', '.markdown'] } },
+        { description: 'YAML', accept: { 'application/x-yaml': ['.yaml', '.yml'] } },
+        { description: 'XML', accept: { 'application/xml': ['.xml', '.svg', '.rss', '.atom'] } },
+        { description: 'JSON', accept: { 'application/json': ['.json'] } },
+        { description: 'Text Files', accept: { 'text/plain': ['.txt'] } },
+        { description: 'All Files', accept: {'*/*': []} }
+    ];
+}
+
+// --- File Saving/Loading (Core Logic) ---
+async function saveFile(isSaveAs = false) {
+    clearActiveSuggestion(false);
+    if (!editor) return; // Guard against no editor
+    if (currentFileIndex < 0 || !files[currentFileIndex]) {
+        console.error("Save attempt failed: No active file.");
+        setStatusMessage("No active file to save", true, 3000);
+        return;
+    }
+    const file = files[currentFileIndex];
+    file.content = editor.getValue(); // Get current content
+    let handle = file.handle;
+
+    // Determine the suggested name and ensure it's valid
+    let suggestedName = file.name;
+    let originalLanguage = file.language; // Store original lang before potential changes
+
+    if (isSaveAs) {
+        suggestedName = saveAsFileNameInput.value.trim();
+        if (!suggestedName) {
+            alert("Please enter a file name.");
+            saveAsFileNameInput.focus();
+            return; // Keep modal open
+        }
+        // If name changed, re-evaluate language based on new extension
+        const newLang = getLanguageFromFileName(suggestedName);
+        if (newLang !== file.language) {
+             // Update file object's language directly here, but don't mark unsaved yet
+             file.language = newLang;
+             console.log(`Language inferred from new name "${suggestedName}": ${newLang}`);
+             // Editor mode will be updated *after* successful save or via picker result
+        }
+    } else if (!file.name) {
+        // This case happens if 'Save' is clicked on a new, unsaved file
+        console.log("Save clicked on new file, triggering Save As flow.");
+        handleSaveAsClick(); // Redirect to Save As
+        return;
+    }
+
+    setStatusMessage(`Saving "${suggestedName}"...`);
+
+    if (window.showSaveFilePicker) {
+        try {
+            const pickerOptions = {
+                suggestedName: suggestedName,
+                types: getFilePickerTypes()
+            };
+            // Force picker if Save As or no handle exists
+            if (isSaveAs || !handle) {
+                handle = await window.showSaveFilePicker(pickerOptions);
+                file.handle = handle; // Store the new handle
+
+                // Update file name and potentially language based *only* on the picker result
+                let languageChangedByPicker = false;
+                let nameChangedByPicker = false;
+                if (file.name !== handle.name) {
+                    console.log(`Name changed in picker: "${file.name}" -> "${handle.name}"`);
+                    file.name = handle.name;
+                    nameChangedByPicker = true; // Flag that name changed
+                    const pickedLang = getLanguageFromFileName(handle.name);
+                    if (pickedLang !== file.language) {
+                        console.log(`Language changed by picker name: "${file.language}" -> "${pickedLang}"`);
+                        file.language = pickedLang;
+                        languageChangedByPicker = true;
+                    }
+                }
+                // If language changed (either via input or picker), update editor & UI now
+                if (languageChangedByPicker || (isSaveAs && file.language !== originalLanguage)) {
+                    setFileLanguage(file.language, true); // Update editor mode, pass flag
+                } else if (nameChangedByPicker) {
+                    // Name changed in picker but language didn't, still need UI update for name
+                    updateUIForFileStatus();
+                }
+            }
+            // Proceed with writing
+            const writable = await handle.createWritable();
+            await writable.write(file.content);
+            await writable.close();
+            file.unsaved = false;
+            console.log(`File "${handle.name}" saved via FSA API.`);
+            setStatusMessage(`Saved ${handle.name}`, false, 3000);
+            updateUIForFileStatus(); // Update lists and buttons
+            if (isSaveAs) closeModal(saveAsModal); // Close modal on successful save as
+
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log("Save cancelled.");
+                setStatusMessage("Save cancelled", false, 3000);
+                // Restore original language/name if Save As was cancelled and they had changed
+                if (isSaveAs) {
+                    let changed = false;
+                    // Restore language if it was changed by user input before picker
+                    if (file.language !== originalLanguage) {
+                        file.language = originalLanguage;
+                        changed = true;
+                        console.log("Save As cancelled, restoring original language.");
+                    }
+                     // Restore name if picker changed it
+                     if (handle && file.name === handle.name && file.name !== suggestedName) {
+                         file.name = suggestedName; // Revert to name *before* picker opened
+                         changed = true;
+                         console.log("Save As cancelled, restoring name before picker.");
+                     }
+                     if (changed) {
+                         setFileLanguage(file.language, true); // Update editor back, also updates UI name
+                     }
+                    closeModal(saveAsModal); // Close modal if Save As was cancelled
+                }
+                return;
+            }
+            console.error("Error saving with FSA API:", err);
+            setStatusMessage(`Save failed: ${err.message}`, true, 5000);
+            // Restore original language on generic save error during Save As
+            if (isSaveAs && file.language !== originalLanguage) {
+                 file.language = originalLanguage;
+                 console.log("Save As failed, restoring original language.");
+                 setFileLanguage(file.language, true); // Update editor back
+            }
+            // Fallback only if it wasn't an explicit Save As cancellation
+            if (!isSaveAs || err.name !== 'AbortError') {
+                console.log("Falling back to download method.");
+                setStatusMessage("Save failed, attempting download...", true, 3000);
+                // Use the name and language *before* the failed save attempt
+                triggerDownload(file.name, file.content, file.language);
+                file.unsaved = false; // Mark as saved after download trigger
+                updateUIForFileStatus();
+                if (isSaveAs) closeModal(saveAsModal); // Close modal even on fallback
+            } else if (isSaveAs) {
+                 closeModal(saveAsModal); // Ensure modal closes on non-Abort cancellation too
+            }
+        }
+    } else {
+        // Fallback legacy download
+        console.log("FSA API not supported. Using download.");
+        // Ensure file name and language match the intended save name if Save As
+        if (isSaveAs) {
+            file.name = suggestedName;
+             // If language changed via input, update editor now
+            if (file.language !== originalLanguage) {
+                 setFileLanguage(file.language, true); // Update editor mode
+            } else {
+                 updateUIForFileStatus(); // Update name display if only name changed
+            }
+        }
+        triggerDownload(file.name, file.content, file.language);
+        file.unsaved = false;
+        setStatusMessage(`Downloaded ${file.name}`, false, 3000);
+        updateUIForFileStatus();
+        if (isSaveAs) closeModal(saveAsModal); // Close modal on successful save as
+    }
+}
+
+function triggerDownload(filename, content, language) {
+    const blob = new Blob([content], { type: getMimeType(language) });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    console.log(`Download initiated: "${filename}".`);
+}
+
+// --- Action Handlers (Menu/Toolbar Clicks) ---
+function handleSaveClick() {
+    if (!editor) return;
+    if (menuSave.dataset.enabled === 'true' || !saveFileBtn.disabled) { // Check both menu and toolbar state
+         saveFile(false);
+    }
+}
+function handleSaveAsClick() {
+     if (!editor) return;
+     // Check if the action should be enabled (i.e., a file is open)
+     if (menuSaveAs.dataset.enabled === 'true') {
+         if (currentFileIndex >= 0 && files[currentFileIndex]) {
+             saveAsFileNameInput.value = files[currentFileIndex].name;
+         } else {
+             saveAsFileNameInput.value = ""; // Should not happen if menu item is enabled correctly
+         }
+         openModal(saveAsModal);
+     }
+}
+function handleSaveAsConfirm() { saveFile(true); } // Modal confirmation calls saveFile(true)
+function handleNewClick() { newFileNameInput.value = ""; newFileLangSelect.value = "javascript"; openModal(newFileModal); }
+function handleCloseFileClick() { if (menuCloseFile.dataset.enabled === 'true' && currentFileIndex >= 0) removeFile(currentFileIndex); }
+
+async function openFile() {
+    console.log("openFile started");
+    if (window.showOpenFilePicker) {
+        console.log("Using showOpenFilePicker");
+        try {
+            clearActiveSuggestion(false);
+            const [handle] = await window.showOpenFilePicker({ types: getFilePickerTypes(), multiple: false });
+            console.log("File handle obtained:", handle.name);
+            // Check if EXACT handle is already open
+            const existingIndexByHandle = files.findIndex(f => f.handle && typeof f.handle.isSameEntry === 'function' && f.handle.isSameEntry(handle));
+            if (existingIndexByHandle !== -1) {
+                console.log(`Switching to already open file (by handle): "${handle.name}"`); setStatusMessage(`Switched to ${handle.name}`, false, 3000); setActiveFile(existingIndexByHandle); return;
+            }
+            // Check if file NAME is already open
+            const existingIndexByName = files.findIndex(f => f.name === handle.name);
+            if (existingIndexByName !== -1) {
+                if (confirm(`"${handle.name}" is already open. Reload it from disk? (Unsaved changes will be lost)`)) {
+                    const fileData = await handle.getFile(); const content = await fileData.text();
+                    files[existingIndexByName].content = content; files[existingIndexByName].unsaved = false; files[existingIndexByName].handle = handle; // Update handle
+                    files[existingIndexByName].language = getLanguageFromFileName(fileData.name);
+                    clearActiveSuggestion(false);
+                    setActiveFile(existingIndexByName); // Will reload content and mode
+                    console.log(`Reloaded "${handle.name}" from disk.`); setStatusMessage(`Reloaded ${handle.name}`, false, 3000); return;
+                } else {
+                    console.log(`Did not reload "${handle.name}". Keeping existing tab.`);
+                    setActiveFile(existingIndexByName); // Just switch focus
+                    return;
+                }
+            }
+            // Open as new file
+            const fileData = await handle.getFile(); const content = await fileData.text();
+            const language = getLanguageFromFileName(fileData.name);
+            const newFile = { name: fileData.name, content: content, language: language, unsaved: false, handle: handle };
+            files.push(newFile);
+            clearActiveSuggestion(false);
+            setActiveFile(files.length - 1);
+            console.log(`Opened "${handle.name}" via FSA API.`); setStatusMessage(`Opened ${handle.name}`, false, 3000);
+        } catch (err) {
+            if (err.name === 'AbortError') { console.log("Open cancelled by user."); setStatusMessage("Open cancelled", false, 3000); }
+            else { console.error("Error opening with FSA API:", err); setStatusMessage(`Open failed: ${err.message}`, true, 5000); }
+        }
+    } else {
+        console.log("FSA API not supported. Using <input type='file'>.");
+        triggerLegacyFileOpen();
+    }
+    console.log("openFile finished");
+}
+function triggerLegacyFileOpen() {
+    console.log("triggerLegacyFileOpen started");
+    clearActiveSuggestion(false);
+    const input = document.createElement("input"); input.type = "file";
+    const allExtensions = getFilePickerTypes()
+        .flatMap(type => Object.values(type.accept || {}).flat())
+        .filter((ext, index, self) => ext && self.indexOf(ext) === index);
+    input.accept = allExtensions.join(',') || "*/*";
+    console.log("Legacy input accept:", input.accept);
+
+    input.onchange = function(e) {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            console.log("Legacy input changed, file selected:", file.name);
+            // Check if file NAME is already open
+            const existingIndexByName = files.findIndex(f => f.name === file.name);
+            if (existingIndexByName !== -1) {
+                if (confirm(`"${file.name}" is already open. Reload it? (Unsaved changes will be lost)`)) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        files[existingIndexByName].content = ev.target.result; files[existingIndexByName].unsaved = false;
+                        files[existingIndexByName].language = getLanguageFromFileName(file.name);
+                        files[existingIndexByName].handle = null; // Reset handle
+                        clearActiveSuggestion(false);
+                        setActiveFile(existingIndexByName); // Will reload
+                        console.log(`Reloaded "${file.name}" (legacy).`); setStatusMessage(`Reloaded ${file.name}`, false, 3000);
+                    }; reader.onerror = (err) => { console.error("FileReader error:", err); setStatusMessage(`Error reading ${file.name}`, true, 5000); };
+                    reader.readAsText(file);
+                } else {
+                    console.log(`Did not reload "${file.name}".`); setStatusMessage(`Kept existing ${file.name}`, false, 3000);
+                    setActiveFile(existingIndexByName); // Just switch focus
+                } return;
+            }
+            // Open as new file (legacy)
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const content = ev.target.result; const language = getLanguageFromFileName(file.name);
+                const newFile = { name: file.name, content: content, language: language, unsaved: false, handle: null };
+                files.push(newFile);
+                clearActiveSuggestion(false);
+                setActiveFile(files.length - 1);
+                console.log(`Opened "${file.name}" (legacy).`); setStatusMessage(`Opened ${file.name}`, false, 3000);
+            }; reader.onerror = (err) => { console.error("FileReader error:", err); setStatusMessage(`Error reading ${file.name}`, true, 5000); alert(`Error reading file: ${file.name}`); }
+            reader.readAsText(file);
+        } else {
+            console.log("Legacy input change event fired, but no file selected.");
+        }
+    };
+    input.click();
+    console.log("Legacy input clicked.");
+}
+
+
+// --- Find & Replace Logic ---
+function toggleFindReplace(show) {
+    clearActiveSuggestion(false);
+    if (!editor) return; // Ensure editor exists
+    if (show && findReplaceContainerEl.style.display === 'flex') {
+        // If already open, just focus the find input
+        findInputEl.focus();
+        findInputEl.select();
+        return;
+    }
+    findReplaceContainerEl.style.display = show ? "flex" : "none";
+    if (show) {
+        const selection = editor.getSelection();
+        if (selection) findInputEl.value = selection;
+        findInputEl.focus();
+        findInputEl.select();
+        lastSearch.cursor = null; // Reset search state
+        lastSearch.query = null;
+    } else {
+        editor.focus(); // Return focus to editor when closing
+    }
+}
+function find(reverse = false) {
+     if (!editor) return; const query = findInputEl.value; if (!query) { setStatusMessage("Find: No query", true, 3000); return; } const caseSensitive = false; // TODO: Add case sensitive option?
+     setStatusMessage(`Finding "${query}"...`);
+     const searchCursor = editor.getSearchCursor(query, reverse ? editor.getCursor("from") : editor.getCursor("to"), { caseFold: !caseSensitive, reverse: reverse });
+     if (!searchCursor.find(reverse)) { // No more matches from current position
+      const startPos = reverse ? CodeMirror.Pos(editor.lastLine()) : CodeMirror.Pos(0, 0);
+      const wrapCursor = editor.getSearchCursor(query, startPos, { caseFold: !caseSensitive, reverse: reverse });
+      if (!wrapCursor.find(reverse)) { // No matches in the entire document
+      setStatusMessage(`"${query}" not found`, true, 3000); return;
+      }
+      // Found after wrapping
+      editor.setSelection(wrapCursor.from(), wrapCursor.to());
+      setStatusMessage(`Found "${query}" (wrapped)`, false, 2000);
+     } else { // Found next/prev match
+      editor.setSelection(searchCursor.from(), searchCursor.to());
+      setStatusMessage(`Found "${query}"`, false, 2000);
+     }
+     editor.scrollIntoView({ from: editor.getCursor("from"), to: editor.getCursor("to") }, 50);
+     findInputEl.focus(); // Keep focus in find input
+}
+function replace() {
+     if (!editor) return; const query = findInputEl.value; const replacement = replaceInputEl.value;
+     const selection = editor.getSelection(); const caseSensitive = false; // TODO: Add option
+     const selectionMatches = selection && (caseSensitive ? selection === query : selection.toLowerCase() === query.toLowerCase());
+
+     if (selection && selectionMatches) {
+      editor.replaceSelection(replacement, "around");
+      setStatusMessage(`Replaced "${query}"`, false, 2000);
+      find(false); // Find the next one automatically
+     } else {
+      find(false); // If selection doesn't match, just find the next one
+     }
+     replaceInputEl.focus(); // Keep focus in replace input after action
+}
+function replaceAll() {
+     if (!editor) return; const query = findInputEl.value; const replacement = replaceInputEl.value; if (!query) { setStatusMessage("Replace All: No query", true, 3000); return; } const caseSensitive = false; // TODO: Add option
+     let count = 0;
+     editor.operation(() => {
+      const cursor = editor.getSearchCursor(query, CodeMirror.Pos(0, 0), { caseFold: !caseSensitive });
+      while (cursor.findNext()) {
+      cursor.replace(replacement);
+      count++;
+      }
+     });
+     setStatusMessage(`Replaced ${count} instance(s) of "${query}"`, false, 3000);
+     editor.focus(); // Return focus to editor after replace all
+}
+
+
+// --- Theme Management ---
+function applyAppTheme(themeName) {
+    const themeConfig = appThemes[themeName];
+    if (!themeConfig) {
+        console.error("Unknown theme:", themeName);
+        return;
+    }
+
+    // 1. Set CodeMirror theme
+    if (editor) {
+        editor.setOption("theme", themeConfig.cm);
+    }
+
+    // 2. Set Body class for overall UI styling
+    document.body.className = `theme-${themeConfig.type}`; // 'theme-light' or 'theme-dark'
+
+    // 3. Update current theme state
+    currentAppTheme = themeName;
+    console.log(`Applied theme: ${themeName} (UI: ${themeConfig.type}, Editor: ${themeConfig.cm})`);
+    setStatusMessage(`Theme: ${themeName}`, false, 2000);
+
+    updateThemeMenuSelection(); // Update theme menu checkmarks
+}
+
+function populateThemeMenu() {
+    themeMenu.innerHTML = ''; // Clear existing
+    Object.keys(appThemes).forEach(themeName => {
+        const li = document.createElement('li');
+        li.className = 'submenu-item theme-option';
+        li.textContent = themeName;
+        li.dataset.themeName = themeName;
+        li.onclick = () => applyAppTheme(themeName);
+        themeMenu.appendChild(li);
+    });
+    updateThemeMenuSelection(); // Set initial checkmark
+}
+
+function updateThemeMenuSelection() {
+    const items = themeMenu.querySelectorAll('.theme-option');
+    items.forEach(item => {
+        if (item.dataset.themeName === currentAppTheme) {
+            item.textContent = `✓ ${item.dataset.themeName}`; // Add checkmark
+            item.style.fontWeight = 'bold';
+        } else {
+            item.textContent = item.dataset.themeName; // Remove checkmark
+            item.style.fontWeight = 'normal';
+        }
+    });
+}
+
+
+// --- Modal Handling ---
+function openModal(modalElement) {
+    clearActiveSuggestion(false);
+    modalElement.classList.add('active'); // Add class to show (uses flex display)
+    const firstInput = modalElement.querySelector('.modal-body input[type="text"], .modal-body select');
+    if (firstInput) {
+        setTimeout(() => {
+             firstInput.focus();
+             if (firstInput.select && typeof firstInput.select === 'function') { // Check if select exists and is function
+                try {
+                    firstInput.select();
+                } catch (e) {
+                    console.warn("Could not select text in input:", firstInput, e);
+                }
+             }
+        }, 50); // Small delay ensures visibility and focusability
+    }
+}
+function closeModal(modalElement) {
+     modalElement.classList.remove('active'); // Remove class to hide
+     if (editor) editor.focus(); // Return focus to editor
+}
+// Close modal if clicking outside the content (on the backdrop)
+window.addEventListener('click', (event) => {
+     // Check if the modal background (the flex container) was clicked
+     if (event.target.classList.contains('modal') && event.target.classList.contains('active')) {
+         closeModal(event.target);
+     }
+});
+// Escape key closing is handled by CodeMirror extraKeys now.
+
+
+// --- AI Suggestion Management ---
+function clearActiveSuggestion(accepted = false) {
+    if (activeSuggestionMarker) {
+        const marker = activeSuggestionMarker;
+        const markerId = marker.id || 'unknown'; // Get ID before clearing if possible
+        activeSuggestionMarker = null; // Clear state immediately
+        console.log(`Clearing suggestion marker ${markerId}. Accepted: ${accepted}`);
+
+        const range = marker.find(); // Get range *before* clearing visual marker
+        marker.clear(); // Remove the styling/marker itself
+
+        if (!accepted && range) {
+            // If rejected and range still exists, remove the text programmatically
+            // Use an origin that handleEditorChange can ignore
+            editor.replaceRange("", range.from, range.to, "+AIClear");
+            console.log(`Suggestion marker ${markerId} rejected and text removed.`);
+            setStatusMessage("Suggestion dismissed", false, 2000);
+        } else if (accepted) {
+            // If accepted, the text stays. Move cursor to the end of the suggestion.
+            if (range) { editor.setCursor(range.to); }
+             setStatusMessage("Suggestion accepted", false, 2000);
+        } else {
+            // If rejected but range is gone (e.g., user deleted manually), just log
+            console.log(`Suggestion marker ${markerId} dismissed (marker cleared).`);
+             setStatusMessage("Suggestion dismissed", false, 2000);
+        }
+        if(editor) editor.focus(); // Ensure editor regains focus
+    }
+}
+
+// --- AI Completion ---
+async function triggerAICompletion() {
+    if (!editor || isAICompleting || currentFileIndex < 0 || editor.getOption("readOnly")) {
+        if (isAICompleting) setStatusMessage("AI is already working...", true, 2000);
+        else if (!editor || editor.getOption("readOnly")) setStatusMessage("Cannot complete in read-only state", true, 2000);
+        else setStatusMessage("Open a file to use AI Completion", true, 2000);
+        return;
+    }
+    clearActiveSuggestion(false); isAICompleting = true; setStatusMessage("AI thinking...");
+    try {
+        const cursor = editor.getCursor();
+        // Get context: current line + some previous lines
+        const startLine = Math.max(0, cursor.line - 15); // Context window: ~15 lines back + current line
+        const endPos = cursor;
+        const textBeforeCursor = editor.getRange(CodeMirror.Pos(startLine, 0), endPos);
+        const promptText = textBeforeCursor.slice(-AI_PROMPT_MAX_CHARS); // Limit prompt size
+
+        console.log("--- Sending Prompt to AI ---"); console.log(promptText);
+        const completion = await fetchAICompletion(promptText);
+        console.log("--- Raw Completion Received ---"); console.log(JSON.stringify(completion));
+
+        if (completion && completion.trim() !== "") {
+            const from = cursor; isInsertingAISuggestion = true; let marker;
+            editor.operation(() => {
+                editor.replaceRange(completion, from, from, "+AICompletion"); const to = editor.getCursor(); // Get position after insertion
+                // Only mark if the insertion actually happened (sometimes CM might adjust 'to')
+                if (CodeMirror.cmpPos(from, to) < 0) {
+                     marker = editor.markText(from, to, { className: 'cm-ai-suggestion' });
+                     activeSuggestionMarker = marker;
+                     marker.on('clear', () => { // Handle external clears
+                         if (activeSuggestionMarker && activeSuggestionMarker.id === marker.id) {
+                             console.log(`Suggestion marker ${marker.id} cleared externally.`);
+                             activeSuggestionMarker = null;
+                         }
+                     });
+                     setStatusMessage("AI Suggestion: Tab=Accept, Esc=Dismiss", false); console.log("AI Suggestion displayed:", completion);
+                 } else {
+                      console.warn("AI Completion did not result in text insertion, range was zero.");
+                      setStatusMessage("AI returned no useful completion", false, 3000);
+                      isInsertingAISuggestion = false; // Reset flag early
+                 }
+            });
+        } else { console.warn("Completion was empty or null after processing."); setStatusMessage("AI returned no useful completion", false, 3000); }
+    } catch (error) { console.error("AI Completion Error:", error); setStatusMessage(`AI Error: ${error.message}`, true, 5000); clearActiveSuggestion(false); // Ensure suggestion is cleared on error
+    } finally { isAICompleting = false; isInsertingAISuggestion = false; if (statusMessageEl.textContent === "AI thinking...") { setStatusMessage("Ready"); } // Reset status if still 'thinking'
+    }
+}
+async function fetchAICompletion(prompt) {
+    try {
+        const requestBody = { prompt: prompt, n_predict: AI_COMPLETION_MAX_TOKENS, temperature: 0.7, stop: AI_COMPLETION_STOP_TOKENS };
+        console.log("--- Sending Request Body ---"); console.log(JSON.stringify(requestBody, null, 2));
+        const response = await fetch(LLAMA_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify(requestBody) });
+        if (!response.ok) { throw new Error(`API request failed: ${response.status} ${response.statusText} - ${await response.text()}`); }
+        const data = await response.json();
+        console.log("--- Raw Response Data from Server ---"); console.log(JSON.stringify(data, null, 2));
+        if (data && data.content) {
+            // Basic cleaning: trim leading/trailing whitespace.
+            let completionText = data.content.trim();
+            // Optional: Remove stop words if they appear exactly at the end
+            for (const stopWord of AI_COMPLETION_STOP_TOKENS) {
+               if (completionText.endsWith(stopWord)) {
+                   completionText = completionText.slice(0, -stopWord.length).trimEnd(); // Trim trailing space after removing stop word
+                   console.log(`Removed stop word "${stopWord}" from end of completion.`);
+               }
+            }
+             // Further refinement: If completion starts with the last few chars of the prompt, remove them?
+             // This can be tricky. A simple check:
+             // const lastPromptWord = prompt.split(/[\s\n]+/).pop();
+             // if (lastPromptWord && completionText.startsWith(lastPromptWord)) {
+             //    completionText = completionText.substring(lastPromptWord.length).trimStart();
+             //    console.log(`Removed likely prompt echo "${lastPromptWord}" from start of completion.`);
+             // }
+
+            return completionText;
+        }
+        else { console.warn("AI response format unexpected or 'content' field missing/empty in raw data:", data); return null; }
+    } catch (error) { console.error("Fetch AI Completion failed:", error); throw new Error(`Could not reach AI server or parse response: ${error.message}`); }
+}
+
+// --- Language Selection ---
+function populateLanguageMenu() {
+    const parentLi = languageSubmenu.closest('.menu-item');
+    if (!languageSubmenu || !parentLi) {
+        console.error("Could not find language submenu or its parent.");
+        return;
+    }
+    languageSubmenu.innerHTML = ''; // Clear existing
+
+    // Get options from the hidden select
+    const options = languageSelectEl.options;
+    for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        const li = document.createElement('li');
+        li.className = 'submenu-item language-option';
+        li.textContent = option.text;
+        li.dataset.langValue = option.value;
+        li.onclick = (e) => {
+            e.stopPropagation(); // Prevent menu closing immediately
+            if (currentFileIndex >= 0) { // Only change if a file is open
+                setFileLanguage(option.value);
+            }
+             // Manually close the menus attempt
+             const topMenu = parentLi.closest('.menu-bar');
+             if (topMenu) {
+                 // Focusing editor is usually enough to close hover menus
+                 if (editor) editor.focus();
+             }
+        };
+        languageSubmenu.appendChild(li);
+    }
+     updateLanguageMenuSelection(); // Set initial checkmark state
+}
+
+function setFileLanguage(newLang, calledDuringSave = false) {
+    if (!editor) return; // Guard
+    if (currentFileIndex >= 0 && files[currentFileIndex]) {
+        const file = files[currentFileIndex];
+        if (file.language === newLang) return; // No change
+
+        clearActiveSuggestion(false);
+        file.language = newLang;
+        editor.setOption("mode", newLang);
+
+        // Enable/disable linting based on mode
+        const lintableModes = ['javascript', 'typescript', 'json', 'css', 'htmlmixed', 'yaml'];
+        editor.setOption("lint", lintableModes.includes(newLang));
+        console.log(`Set language to ${newLang}. Linting: ${editor.getOption("lint")}`);
+
+
+        const langOption = languageSelectEl.querySelector(`option[value="${newLang}"]`);
+        const langName = langOption ? langOption.text : newLang;
+        setStatusMessage(`Language set to ${langName}`, false, 3000);
+
+        // Mark unsaved only if not called during a save operation where language was auto-detected/changed
+        if (!calledDuringSave) {
+            file.unsaved = true;
+        }
+        updateUIForFileStatus(); // Update status bar, buttons, menu checkmark etc.
+    }
+}
+
+function updateLanguageMenuSelection() {
+     if (!languageSubmenu) return;
+     const items = languageSubmenu.querySelectorAll('.language-option');
+     const currentLang = (currentFileIndex >= 0 && files[currentFileIndex]) ? files[currentFileIndex].language : null;
+
+     items.forEach(item => {
+        const optionEl = languageSelectEl.querySelector(`option[value="${item.dataset.langValue}"]`);
+        const optionText = optionEl ? optionEl.text : item.dataset.langValue; // Fallback to value if text not found
+
+         if (currentLang && item.dataset.langValue === currentLang) {
+             item.textContent = `✓ ${optionText}`;
+             item.style.fontWeight = 'bold';
+         } else {
+             item.textContent = optionText; // Reset text to original (without checkmark)
+             item.style.fontWeight = 'normal';
+         }
+     });
+}
+
+
+// --- Event Listener Setup ---
+function setupEventListeners() {
+    // Toolbar Buttons
+    document.getElementById("toolbar-new").addEventListener("click", handleNewClick);
+    document.getElementById("toolbar-open").addEventListener("click", openFile);
+    document.getElementById("toolbar-save").addEventListener("click", handleSaveClick);
+    document.getElementById("toolbar-find").addEventListener("click", () => toggleFindReplace(true));
+
+    // Menu Items
+    document.getElementById("menu-new").addEventListener("click", handleNewClick);
+    document.getElementById("menu-open").addEventListener("click", openFile);
+    document.getElementById("menu-save").addEventListener("click", handleSaveClick);
+    document.getElementById("menu-saveas").addEventListener("click", handleSaveAsClick);
+    document.getElementById("menu-closefile").addEventListener("click", handleCloseFileClick);
+    document.getElementById("menu-undo").addEventListener("click", () => { if (editor && menuUndo.dataset.enabled === 'true') editor.undo(); });
+    document.getElementById("menu-redo").addEventListener("click", () => { if (editor && menuRedo.dataset.enabled === 'true') editor.redo(); });
+    document.getElementById("menu-find").addEventListener("click", () => toggleFindReplace(true));
+    document.getElementById("menu-ai-complete").addEventListener("click", triggerAICompletion);
+    document.getElementById("menu-toggle-linenumbers").addEventListener("click", () => { if(editor) editor.setOption("lineNumbers", !editor.getOption("lineNumbers"))});
+    document.getElementById("menu-toggle-wrapping").addEventListener("click", () => { if(editor) editor.setOption("lineWrapping", !editor.getOption("lineWrapping"))});
+
+
+    // Find/Replace Buttons & Inputs
+    document.getElementById("findPrevBtn").addEventListener("click", () => find(true));
+    document.getElementById("findNextBtn").addEventListener("click", () => find(false));
+    document.getElementById("replaceBtn").addEventListener("click", replace);
+    document.getElementById("replaceAllBtn").addEventListener("click", replaceAll);
+    document.getElementById("closeFindBtn").addEventListener("click", () => toggleFindReplace(false));
+
+    findInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); find(e.shiftKey); }
+        else if (e.key === 'Escape') { toggleFindReplace(false); }
+    });
+    replaceInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); replace(); }
+        else if (e.key === 'Escape') { toggleFindReplace(false); }
+    });
+
+    // Modal Buttons & Inputs
+    document.getElementById("closeNewFileModal").addEventListener("click", () => closeModal(newFileModal));
+    document.getElementById("cancelNewFile").addEventListener("click", () => closeModal(newFileModal));
+    document.getElementById("createNewFile").addEventListener("click", () => {
+        const name = newFileNameInput.value.trim();
+        const lang = newFileLangSelect.value;
+        let finalName = name;
+        // Suggest extension if none provided and name exists
+        if (name && name.indexOf('.') === -1) {
+            finalName = name + getSuggestedExtension(lang);
+        }
+        // Re-check language based on final name (user might have typed extension)
+        const finalLang = getLanguageFromFileName(finalName);
+
+        if (createNewFile(finalName, finalLang)) {
+            closeModal(newFileModal);
+        } else {
+            // Keep modal open on failure (e.g., empty name, duplicate)
+             if (!name) newFileNameInput.focus(); // Focus name if empty
+        }
+    });
+    document.getElementById("closeSaveAsModal").addEventListener("click", () => closeModal(saveAsModal));
+    document.getElementById("cancelSaveAs").addEventListener("click", () => closeModal(saveAsModal));
+    document.getElementById("confirmSaveAs").addEventListener("click", handleSaveAsConfirm);
+
+    // Modal Enter Keypress
+     newFileNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('createNewFile').click(); });
+     newFileLangSelect.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('createNewFile').click(); }); // Also allow enter on select
+     saveAsFileNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('confirmSaveAs').click(); });
+
+    // Global Keyboard Shortcuts are mostly handled by CodeMirror `extraKeys`.
+
+    // Warn before leaving page
+    window.addEventListener('beforeunload', (event) => {
+        const hasUnsaved = files.some(file => file.unsaved);
+        if (hasUnsaved) {
+            const msg = 'You have unsaved changes. Are you sure you want to leave?';
+            event.preventDefault(); // Standard way to trigger confirmation
+            event.returnValue = msg; // For older browsers
+            return msg; // For some modern browsers
+        }
+    });
+}
+
+
+// --- App Entry Point ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Loaded, initializing editor...");
+    initEditor(); // Initialize CodeMirror first
+    setupEventListeners(); // Then setup listeners that might interact with it
+    // Set initial state for UI elements
+    if (currentFileIndex === -1) {
+         if (editor) editor.setOption("readOnly", true); // Ensure read-only if no file starts loaded
+        updateUIForFileStatus();
+    }
+    setStatusMessage("Ready");
+});
+
+</script>
+</body>
+</html>
