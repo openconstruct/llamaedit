@@ -281,6 +281,11 @@ body.theme-light .toolbar button.danger:hover { background-color: #bd2130; }
 label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; }
 input[type="text"], input[type="number"], select { box-sizing: border-box; width: 100%; padding: 8px 10px; border-radius: 3px; border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--app-fg); font-size: 0.95em; }
 input[type="text"]:focus, input[type="number"]:focus, select:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 1px var(--input-focus-border); }
+/* ADDED: Style for range input */
+input[type="range"] { width: 100%; cursor: pointer; }
+/* ADDED: Style for value display span */
+.range-value-display { font-weight: bold; margin-left: 10px; min-width: 35px; display: inline-block; text-align: right; }
+
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 15px; border-top: 1px solid var(--border-color); background-color: var(--modal-header-bg); }
 .modal-actions button { font-weight: 500; }
 .modal-actions button.primary { background-color: var(--input-focus-border); color: white; border-color: var(--input-focus-border); }
@@ -299,6 +304,11 @@ body.theme-light .modal-actions button.primary { color: white; }
 #settingsModal .modal-body h4:first-of-type {
     margin-top: 0;
 }
+/* ADDED: Style for the slider group */
+#settingsModal .slider-group { display: flex; align-items: center; justify-content: space-between; }
+#settingsModal .slider-group label { margin-bottom: 0; flex-shrink: 0; margin-right: 15px;} /* Adjust label spacing */
+#settingsModal .slider-group input[type="range"] { flex-grow: 1; margin-right: 5px; }
+
 
 </style>
 </head>
@@ -532,7 +542,13 @@ Theme
                 <label for="settingApiUrl">Llama API URL:</label>
                 <input type="text" id="settingApiUrl" placeholder="http://localhost:8080/completion">
             </div>
-            <!-- NEW LLM Settings -->
+            <!-- ADDED: Slider for total context -->
+            <div class="form-group slider-group">
+                <label for="settingAiContextSize">Context Size (chars):</label>
+                <input type="range" id="settingAiContextSize" min="512" max="4096" step="128">
+                <span id="settingAiContextSizeValue" class="range-value-display">2048</span> <!-- Default display value -->
+            </div>
+            <!-- End Added Slider -->
             <div class="form-group">
                 <label for="settingAiTemp">Temperature (0-2, e.g., 0.7):</label>
                 <input type="number" id="settingAiTemp" min="0" max="2" step="0.1">
@@ -549,7 +565,6 @@ Theme
                 <label for="settingAiMaxTokens">Max New Tokens (e.g., 128):</label>
                 <input type="number" id="settingAiMaxTokens" min="1" step="1">
             </div>
-            <!-- End NEW LLM Settings -->
 
         </div>
         <div class="modal-actions">
@@ -576,9 +591,12 @@ window.jsyaml = jsyaml; // Make js-yaml available
     const DEFAULT_AI_TOP_K = 40;
     const DEFAULT_AI_TOP_P = 0.9;
     const DEFAULT_AI_MAX_TOKENS = 128;
+    const DEFAULT_AI_TOTAL_CONTEXT_CHARS = 2048; // ADDED: Default total context size
+    // const AI_CONTEXT_BEFORE_CHARS = 1200; // REMOVED
+    // const AI_CONTEXT_AFTER_CHARS = 848;   // REMOVED
+    const AI_CONTEXT_BEFORE_RATIO = 0.58; // ADDED: Ratio of total context to take from before cursor (~1200/2048)
     // --- Other constants remain the same ---
     const AI_COMPLETION_STOP_TOKENS = ["\n", "\t", ";", "}", ")", "<|EOT|>", "```"];
-    const AI_PROMPT_MAX_CHARS = 2048;
     const STATUS_MESSAGE_DEFAULT = "Ready";
     const STATUS_MESSAGE_DURATION = 3000;
     const MODAL_FOCUS_DELAY = 50;
@@ -609,16 +627,17 @@ window.jsyaml = jsyaml; // Make js-yaml available
     let currentAppTheme = DEFAULT_THEME_NAME; // Current application theme name
     let statusTimeoutId = null; // Timeout ID for clearing status messages
 
-    // MODIFIED: Add AI settings to appSettings
+    // MODIFIED: Add/Adjust AI settings in appSettings
     let appSettings = {
         fontSize: 14,
         tabSize: 2,
         indentWithTabs: false,
         apiUrl: DEFAULT_API_URL,
-        aiTemperature: DEFAULT_AI_TEMP, // NEW
-        aiTopK: DEFAULT_AI_TOP_K,       // NEW
-        aiTopP: DEFAULT_AI_TOP_P,       // NEW
-        aiMaxTokens: DEFAULT_AI_MAX_TOKENS // NEW (replaces old constant for usage)
+        aiTemperature: DEFAULT_AI_TEMP,
+        aiTopK: DEFAULT_AI_TOP_K,
+        aiTopP: DEFAULT_AI_TOP_P,
+        aiMaxTokens: DEFAULT_AI_MAX_TOKENS,
+        aiTotalContextChars: DEFAULT_AI_TOTAL_CONTEXT_CHARS // ADDED
     };
 
     // --- DOM Element References (Cached) ---
@@ -655,11 +674,13 @@ window.jsyaml = jsyaml; // Make js-yaml available
         dom.settingIndentType = document.getElementById('settingIndentType');
         dom.settingApiUrl = document.getElementById('settingApiUrl');
 
-        // NEW: Cache new AI setting inputs
+        // MODIFIED: Cache new AI setting inputs including slider
         dom.settingAiTemp = document.getElementById('settingAiTemp');
         dom.settingAiTopK = document.getElementById('settingAiTopK');
         dom.settingAiTopP = document.getElementById('settingAiTopP');
         dom.settingAiMaxTokens = document.getElementById('settingAiMaxTokens');
+        dom.settingAiContextSize = document.getElementById('settingAiContextSize'); // ADDED
+        dom.settingAiContextSizeValue = document.getElementById('settingAiContextSizeValue'); // ADDED
     }
 
     // --- Initialization ---
@@ -667,7 +688,7 @@ window.jsyaml = jsyaml; // Make js-yaml available
      /** Loads settings from localStorage or uses defaults. */
     function loadSettings() {
         const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
-        // MODIFIED: Include new AI defaults
+        // MODIFIED: Include new AI defaults including context size
         const defaultSettings = {
             fontSize: 14,
             tabSize: 2,
@@ -676,7 +697,8 @@ window.jsyaml = jsyaml; // Make js-yaml available
             aiTemperature: DEFAULT_AI_TEMP,
             aiTopK: DEFAULT_AI_TOP_K,
             aiTopP: DEFAULT_AI_TOP_P,
-            aiMaxTokens: DEFAULT_AI_MAX_TOKENS
+            aiMaxTokens: DEFAULT_AI_MAX_TOKENS,
+            aiTotalContextChars: DEFAULT_AI_TOTAL_CONTEXT_CHARS // ADDED
         };
 
         if (storedSettings) {
@@ -698,6 +720,7 @@ window.jsyaml = jsyaml; // Make js-yaml available
         appSettings.aiTopK = typeof appSettings.aiTopK === 'number' ? appSettings.aiTopK : DEFAULT_AI_TOP_K;
         appSettings.aiTopP = typeof appSettings.aiTopP === 'number' ? appSettings.aiTopP : DEFAULT_AI_TOP_P;
         appSettings.aiMaxTokens = typeof appSettings.aiMaxTokens === 'number' && appSettings.aiMaxTokens > 0 ? appSettings.aiMaxTokens : DEFAULT_AI_MAX_TOKENS;
+        appSettings.aiTotalContextChars = typeof appSettings.aiTotalContextChars === 'number' && appSettings.aiTotalContextChars >= 512 ? appSettings.aiTotalContextChars : DEFAULT_AI_TOTAL_CONTEXT_CHARS; // ADDED validation
     }
 
     /** Initializes the CodeMirror editor instance. */
@@ -812,11 +835,13 @@ window.jsyaml = jsyaml; // Make js-yaml available
         dom.settingTabSize.value = appSettings.tabSize;
         dom.settingIndentType.value = appSettings.indentWithTabs ? 'tabs' : 'spaces';
         dom.settingApiUrl.value = appSettings.apiUrl;
-        // NEW: Populate AI settings
+        // MODIFIED: Populate AI settings including slider
         dom.settingAiTemp.value = appSettings.aiTemperature;
         dom.settingAiTopK.value = appSettings.aiTopK;
         dom.settingAiTopP.value = appSettings.aiTopP;
         dom.settingAiMaxTokens.value = appSettings.aiMaxTokens;
+        dom.settingAiContextSize.value = appSettings.aiTotalContextChars; // Set slider value
+        dom.settingAiContextSizeValue.textContent = appSettings.aiTotalContextChars; // Set display span
     }
 
     /** Handles clicking the "Save Settings" button in the modal. */
@@ -826,11 +851,12 @@ window.jsyaml = jsyaml; // Make js-yaml available
         const newTabSize = parseInt(dom.settingTabSize.value, 10);
         const newIndentWithTabs = dom.settingIndentType.value === 'tabs';
         const newApiUrl = dom.settingApiUrl.value.trim();
-        // NEW: Read AI settings
+        // MODIFIED: Read AI settings including slider
         const newTemp = parseFloat(dom.settingAiTemp.value);
         const newTopK = parseInt(dom.settingAiTopK.value, 10);
         const newTopP = parseFloat(dom.settingAiTopP.value);
         const newMaxTokens = parseInt(dom.settingAiMaxTokens.value, 10);
+        const newTotalContext = parseInt(dom.settingAiContextSize.value, 10); // ADDED: Read slider
 
 
         // --- (Validation for editor settings) ---
@@ -838,7 +864,7 @@ window.jsyaml = jsyaml; // Make js-yaml available
         if (isNaN(newTabSize) || newTabSize < 1 || newTabSize > 8) { alert("Tab size must be between 1 and 8."); dom.settingTabSize.focus(); return; }
         if (newApiUrl && !newApiUrl.startsWith('http://') && !newApiUrl.startsWith('https://')) { alert("Please enter a valid URL (starting with http:// or https://) for the AI API."); dom.settingApiUrl.focus(); return; }
 
-        // NEW: Validation for AI settings
+        // MODIFIED: Validation for AI settings including slider
         if (isNaN(newTemp) || newTemp < 0 || newTemp > 2) {
             alert("Temperature must be a number between 0 and 2.");
             dom.settingAiTemp.focus();
@@ -859,6 +885,14 @@ window.jsyaml = jsyaml; // Make js-yaml available
             dom.settingAiMaxTokens.focus();
             return;
         }
+        // ADDED: Slider validation
+        const minContext = parseInt(dom.settingAiContextSize.min, 10);
+        const maxContext = parseInt(dom.settingAiContextSize.max, 10);
+        if (isNaN(newTotalContext) || newTotalContext < minContext || newTotalContext > maxContext) {
+             alert(`Context Size must be between ${minContext} and ${maxContext}.`);
+             dom.settingAiContextSize.focus();
+             return;
+        }
 
 
         // --- (Update appSettings with editor values) ---
@@ -866,11 +900,12 @@ window.jsyaml = jsyaml; // Make js-yaml available
         appSettings.tabSize = newTabSize;
         appSettings.indentWithTabs = newIndentWithTabs;
         appSettings.apiUrl = newApiUrl || DEFAULT_API_URL;
-        // NEW: Update appSettings with AI values
+        // MODIFIED: Update appSettings with AI values including slider
         appSettings.aiTemperature = newTemp;
         appSettings.aiTopK = newTopK;
         appSettings.aiTopP = newTopP;
         appSettings.aiMaxTokens = newMaxTokens;
+        appSettings.aiTotalContextChars = newTotalContext; // ADDED: Save slider value
 
 
         applySettings(); // Apply editor settings
@@ -911,6 +946,7 @@ window.jsyaml = jsyaml; // Make js-yaml available
         if (!modalElement) return;
         clearActiveSuggestion(false);
         modalElement.classList.add('active');
+        // Focus logic remains the same, usually focuses first text/number/select input
         const firstInput = modalElement.querySelector('.modal-body input[type="text"], .modal-body input[type="number"], .modal-body select');
         if (firstInput) {
             setTimeout(() => {
@@ -1453,7 +1489,6 @@ window.jsyaml = jsyaml; // Make js-yaml available
     }
 
     /** Fetches AI completion from the backend API. */
-    // MODIFIED: Use appSettings for AI parameters
     async function fetchAICompletion(prompt) {
         setStatusMessage("AI thinking...");
         const apiUrlToUse = appSettings.apiUrl || DEFAULT_API_URL;
@@ -1462,10 +1497,10 @@ window.jsyaml = jsyaml; // Make js-yaml available
             // Use settings from appSettings object
             const requestBody = {
                 prompt: prompt,
-                n_predict: appSettings.aiMaxTokens,    // Use setting
-                temperature: appSettings.aiTemperature, // Use setting
-                top_k: appSettings.aiTopK,          // Use setting
-                top_p: appSettings.aiTopP,          // Use setting
+                n_predict: appSettings.aiMaxTokens,
+                temperature: appSettings.aiTemperature,
+                top_k: appSettings.aiTopK,
+                top_p: appSettings.aiTopP,
                 stop: AI_COMPLETION_STOP_TOKENS
             };
              // Add top_k and top_p only if they are meaningfully set
@@ -1520,9 +1555,29 @@ window.jsyaml = jsyaml; // Make js-yaml available
 
         clearActiveSuggestion(false); isAICompleting = true;
         try {
-            const cursor = editor.getCursor(); const contextLines = 15; const startLine = Math.max(0, cursor.line - contextLines);
-            const textBeforeCursor = editor.getRange(CodeMirror.Pos(startLine, 0), cursor);
-            const promptText = textBeforeCursor.slice(-AI_PROMPT_MAX_CHARS);
+            // --- MODIFIED: Context gathering using setting ---
+            const cursor = editor.getCursor();
+            const totalContext = appSettings.aiTotalContextChars;
+            const contextBeforeChars = Math.floor(totalContext * AI_CONTEXT_BEFORE_RATIO);
+            const contextAfterChars = totalContext - contextBeforeChars;
+
+            // Get text before cursor
+            const docStart = CodeMirror.Pos(0, 0);
+            const textBefore = editor.getRange(docStart, cursor);
+            const contextBefore = textBefore.slice(-contextBeforeChars); // Get last N chars
+
+            // Get text after cursor
+            const lastLineNum = editor.lastLine();
+            const endOfDoc = CodeMirror.Pos(lastLineNum, editor.getLine(lastLineNum).length);
+            const textAfter = editor.getRange(cursor, endOfDoc);
+            const contextAfter = textAfter.slice(0, contextAfterChars); // Get first N chars
+
+            // Combine context
+            const promptText = contextBefore + contextAfter;
+            console.log(`AI Prompt Context: ${contextBefore.length} chars before, ${contextAfter.length} chars after (Total Setting: ${totalContext})`);
+            // console.log("Full prompt:", promptText); // Uncomment for debugging the exact prompt
+            // --- End of context modification ---
+
             const completion = await fetchAICompletion(promptText);
 
             if (completion) {
@@ -1604,6 +1659,12 @@ window.jsyaml = jsyaml; // Make js-yaml available
     function handleTabKey(cm) { if (activeSuggestionMarker) { clearActiveSuggestion(true); return; } return CodeMirror.Pass; }
     function handleBeforeUnload(event) { const hasUnsaved = files.some(file => file.unsaved); if (hasUnsaved) { const msg = 'You have unsaved changes. Are you sure you want to leave?'; event.preventDefault(); event.returnValue = msg; return msg; } }
     function handleModalBackdropClick(event) { if (event.target.classList.contains('modal') && event.target.classList.contains('active')) { closeModal(event.target); } }
+    // ADDED: Handler for slider input to update display
+    function handleContextSliderInput(event) {
+        if (dom.settingAiContextSizeValue) {
+            dom.settingAiContextSizeValue.textContent = event.target.value;
+        }
+    }
 
 
     // --- Event Listener Setup ---
@@ -1648,11 +1709,14 @@ window.jsyaml = jsyaml; // Make js-yaml available
         dom.settingTabSize.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); });
         dom.settingIndentType.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); });
         dom.settingApiUrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); });
-        // NEW: Enter listeners for AI settings
+        // MODIFIED: Enter listeners for AI settings
         dom.settingAiTemp.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); });
         dom.settingAiTopK.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); });
         dom.settingAiTopP.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); });
         dom.settingAiMaxTokens.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); });
+        // ADDED: Listener for slider input event
+        dom.settingAiContextSize.addEventListener('input', handleContextSliderInput);
+        dom.settingAiContextSize.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSaveSettingsClick(); }); // Allow enter save from slider too
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         window.addEventListener('click', handleModalBackdropClick);
